@@ -3,895 +3,244 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CreditIQ — Motor de Análise de Crédito</title>
+<title>Vexor — Motor de Análise de Crédito</title>
 <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>
-/* ───── DESIGN SYSTEM ───── */
 :root {
-  --ink:       #0A0E1A;
-  --ink-2:     #1C2235;
-  --ink-3:     #2D3452;
-  --surface:   #F4F5F8;
-  --surface-2: #ECEEF4;
-  --border:    rgba(45,52,82,0.12);
-  
-  --gold:      #C8972A;
-  --gold-light:#F0C84A;
-  --gold-dim:  rgba(200,151,42,0.15);
-  
-  --emerald:   #1A7A5E;
-  --emerald-light:#22A67D;
-  --emerald-dim: rgba(26,122,94,0.12);
-  
-  --crimson:   #B02A2A;
-  --crimson-light:#D94444;
-  --crimson-dim: rgba(176,42,42,0.12);
-  
-  --blue:      #2557A7;
-  --blue-light:#3B78D4;
-  --blue-dim:  rgba(37,87,167,0.12);
-
-  --sidebar-w: 260px;
-  --radius:    12px;
-  --radius-lg: 20px;
-  --shadow-sm: 0 2px 8px rgba(10,14,26,0.08);
-  --shadow-md: 0 8px 32px rgba(10,14,26,0.12);
-  --shadow-lg: 0 24px 64px rgba(10,14,26,0.16);
+  --ink:       #0a0c10;
+  --ink-2:     #12151c;
+  --ink-3:     #1c2030;
+  --ink-4:     #252a38;
+  --surface:   #0e1018;
+  --border:    rgba(232,228,218,0.07);
+  --border-2:  rgba(232,228,218,0.12);
+  --gold:      #c9a84c;
+  --gold-light:#e2c46e;
+  --gold-dim:  rgba(201,168,76,0.12);
+  --gold-glow: rgba(201,168,76,0.06);
+  --cream:     #e8e4da;
+  --cream-dim: rgba(232,228,218,0.55);
+  --cream-mute:rgba(232,228,218,0.28);
+  --emerald:   #2a7a5e;
+  --emerald-light:#35a07a;
+  --emerald-dim: rgba(42,122,94,0.14);
+  --crimson:   #a03030;
+  --crimson-light:#c44444;
+  --crimson-dim: rgba(160,48,48,0.14);
+  --blue:      #2a5090;
+  --blue-light:#3b6bbf;
+  --blue-dim:  rgba(42,80,144,0.14);
+  --sidebar-w: 264px;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
   --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--surface);
-  color: var(--ink);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* ───── SIDEBAR ───── */
-#sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
-  background: var(--ink);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  position: relative;
-  z-index: 100;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.3);
-}
-
-.sidebar-brand {
-  padding: 28px 24px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.brand-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.brand-icon {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
-
-.brand-name {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px;
-  color: #fff;
-  letter-spacing: -0.3px;
-}
-
-.brand-tagline {
-  font-size: 11px;
-  color: rgba(255,255,255,0.38);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-left: 50px;
-}
-
-.sidebar-section {
-  padding: 20px 16px 8px;
-}
-
-.sidebar-section-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.28);
-  padding: 0 8px;
-  margin-bottom: 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: var(--transition);
-  color: rgba(255,255,255,0.55);
-  font-size: 14px;
-  font-weight: 400;
-  margin-bottom: 2px;
-  border: 1px solid transparent;
-  text-decoration: none;
-}
-
-.nav-item:hover {
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.85);
-}
-
-.nav-item.active {
-  background: rgba(200,151,42,0.15);
-  color: var(--gold-light);
-  border-color: rgba(200,151,42,0.25);
-  font-weight: 500;
-}
-
-.nav-icon {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px;
-  background: rgba(255,255,255,0.05);
-  flex-shrink: 0;
-}
-
-.nav-item.active .nav-icon {
-  background: rgba(200,151,42,0.2);
-}
-
-.nav-badge {
-  margin-left: auto;
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 20px;
-  background: var(--gold-dim);
-  color: var(--gold-light);
-  font-weight: 600;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 20px 24px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.sidebar-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.sidebar-stat-label { font-size: 11px; color: rgba(255,255,255,0.35); }
-.sidebar-stat-value { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 500; }
-
-.study-badge {
-  margin-top: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  line-height: 1.5;
-}
-
-/* ───── MAIN CONTENT ───── */
-#main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.topbar {
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  padding: 0 32px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-.topbar-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 19px;
-  color: var(--ink);
-  letter-spacing: -0.3px;
-}
-
-.topbar-subtitle {
-  font-size: 12px;
-  color: rgba(10,14,26,0.45);
-  margin-top: 1px;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--emerald);
-  background: var(--emerald-dim);
-  border: 1px solid rgba(26,122,94,0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-weight: 500;
-}
-
-.status-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--emerald);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 28px 32px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-/* ───── PAGES ───── */
-.page { display: none; animation: fadeIn 0.3s ease; }
-.page.active { display: block; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ───── CARDS ───── */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.metric-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  position: relative;
-  overflow: hidden;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-}
-
-.metric-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.metric-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-}
-
-.metric-card.gold::before   { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
-.metric-card.emerald::before { background: linear-gradient(90deg, var(--emerald), var(--emerald-light)); }
-.metric-card.crimson::before { background: linear-gradient(90deg, var(--crimson), var(--crimson-light)); }
-.metric-card.blue::before    { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
-
-.metric-icon {
-  width: 40px; height: 40px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  margin-bottom: 14px;
-}
-
-.metric-card.gold .metric-icon    { background: var(--gold-dim); }
-.metric-card.emerald .metric-icon { background: var(--emerald-dim); }
-.metric-card.crimson .metric-icon { background: var(--crimson-dim); }
-.metric-card.blue .metric-icon    { background: var(--blue-dim); }
-
-.metric-label { font-size: 11px; font-weight: 500; color: rgba(10,14,26,0.45); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
-.metric-value { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); line-height: 1; margin-bottom: 6px; }
-.metric-sub   { font-size: 12px; color: rgba(10,14,26,0.5); }
-
-.metric-badge {
-  position: absolute;
-  top: 16px; right: 16px;
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-weight: 600;
-}
-
-.badge-gold    { background: var(--gold-dim);    color: var(--gold); }
-.badge-emerald { background: var(--emerald-dim); color: var(--emerald); }
-.badge-crimson { background: var(--crimson-dim); color: var(--crimson); }
-.badge-blue    { background: var(--blue-dim);    color: var(--blue); }
-
-/* ───── CHART CARDS ───── */
-.charts-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.charts-grid-3 {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.chart-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 22px 24px;
-  box-shadow: var(--shadow-sm);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 18px;
-}
-
-.chart-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink);
-  letter-spacing: -0.2px;
-}
-
-.chart-subtitle {
-  font-size: 12px;
-  color: rgba(10,14,26,0.45);
-  margin-top: 3px;
-  line-height: 1.4;
-}
-
-.chart-tag {
-  font-size: 10px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* ───── INSIGHT BOX ───── */
-.insight-box {
-  background: linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
-  border-radius: var(--radius-lg);
-  padding: 24px 28px;
-  color: #fff;
-  margin-bottom: 20px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 20px;
-  align-items: center;
-  box-shadow: var(--shadow-md);
-}
-
-.insight-icon {
-  font-size: 32px;
-}
-
-.insight-text strong {
-  font-family: 'DM Serif Display', serif;
-  font-size: 17px;
-  display: block;
-  margin-bottom: 5px;
-  color: var(--gold-light);
-}
-
-.insight-text p {
-  font-size: 13px;
-  color: rgba(255,255,255,0.65);
-  line-height: 1.5;
-}
-
-.insight-stat {
-  text-align: right;
-}
-
-.insight-stat .big { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--gold-light); line-height: 1; }
-.insight-stat .sm  { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
-
-/* ───── SIMULATOR (PAGE 2) ───── */
-.simulator-layout {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.sim-form-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 0;
-}
-
-.sim-form-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 17px;
-  margin-bottom: 4px;
-}
-
-.sim-form-subtitle {
-  font-size: 12px;
-  color: rgba(10,14,26,0.45);
-  margin-bottom: 22px;
-  line-height: 1.4;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(10,14,26,0.6);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.form-label-icon { font-size: 13px; }
-
-.form-input, .form-select {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--surface);
-  transition: var(--transition);
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.form-input:focus, .form-select:focus {
-  border-color: var(--gold);
-  background: #fff;
-  box-shadow: 0 0 0 3px var(--gold-dim);
-}
-
-.toggle-group {
-  display: flex;
-  gap: 8px;
-}
-
-.toggle-btn {
-  flex: 1;
-  padding: 9px;
-  border: 1.5px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  color: rgba(10,14,26,0.55);
-  cursor: pointer;
-  transition: var(--transition);
-  font-weight: 500;
-}
-
-.toggle-btn.selected {
-  border-color: var(--gold);
-  background: var(--gold-dim);
-  color: var(--gold);
-}
-
-.score-toggle-group {
-  display: flex;
-  gap: 6px;
-}
-
-.score-btn {
-  flex: 1;
-  padding: 9px 4px;
-  border: 1.5px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  color: rgba(10,14,26,0.55);
-  cursor: pointer;
-  transition: var(--transition);
-  font-weight: 500;
-  text-align: center;
-}
-
-.score-btn.low.selected    { border-color: var(--crimson);  background: var(--crimson-dim);  color: var(--crimson); }
-.score-btn.good.selected   { border-color: var(--gold);     background: var(--gold-dim);     color: var(--gold); }
-.score-btn.great.selected  { border-color: var(--emerald);  background: var(--emerald-dim);  color: var(--emerald); }
-
-.range-value {
-  font-size: 13px;
-  color: var(--gold);
-  font-weight: 600;
-  text-align: right;
-  margin-bottom: 4px;
-}
-
-input[type="range"] {
-  width: 100%;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--gold);
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(200,151,42,0.4);
-}
-
-.btn-analisar {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
-  color: #fff;
-  border: none;
-  border-radius: 11px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  margin-top: 6px;
-  letter-spacing: 0.2px;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-analisar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--gold-dim), transparent);
-  opacity: 0;
-  transition: var(--transition);
-}
-
-.btn-analisar:hover::before { opacity: 1; }
-.btn-analisar:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(10,14,26,0.25); }
-.btn-analisar:active { transform: translateY(0); }
-
-/* ───── RESULTADO ───── */
-.result-area { display: flex; flex-direction: column; gap: 18px; }
-
-.result-hero {
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.result-hero.potencial { background: linear-gradient(135deg, #1C1400 0%, #2A1E00 100%); border: 1px solid rgba(200,151,42,0.3); }
-.result-hero.bom       { background: linear-gradient(135deg, #001410 0%, #001A14 100%); border: 1px solid rgba(26,122,94,0.3); }
-.result-hero.inadimplente { background: linear-gradient(135deg, #140000 0%, #1A0000 100%); border: 1px solid rgba(176,42,42,0.3); }
-
-.result-persona-icon {
-  font-size: 52px;
-  line-height: 1;
-}
-
-.result-persona-name {
-  font-family: 'DM Serif Display', serif;
-  font-size: 22px;
-  color: #fff;
-  margin-bottom: 6px;
-}
-
-.result-persona-desc {
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.6);
-}
-
-.result-score-ring {
-  margin-left: auto;
-  text-align: center;
-}
-
-.score-ring-value {
-  font-family: 'DM Serif Display', serif;
-  font-size: 32px;
-}
-
-.score-ring-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: rgba(255,255,255,0.4);
-}
-
-.result-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.result-metric-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow-sm);
-}
-
-.rmc-label { font-size: 11px; color: rgba(10,14,26,0.45); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.rmc-value { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); }
-.rmc-sub   { font-size: 11px; color: rgba(10,14,26,0.5); margin-top: 2px; }
-
-.alert-box {
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-
-.alert-box.ruptura  { background: var(--crimson-dim); border: 1px solid rgba(176,42,42,0.2); }
-.alert-box.oport    { background: var(--emerald-dim); border: 1px solid rgba(26,122,94,0.2); }
-.alert-box.info     { background: var(--blue-dim);    border: 1px solid rgba(37,87,167,0.18); }
-.alert-box.aviso    { background: var(--gold-dim);    border: 1px solid rgba(200,151,42,0.2); }
-
-.alert-icon { font-size: 20px; margin-top: 1px; }
-.alert-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.alert-text  { font-size: 12.5px; line-height: 1.6; color: rgba(10,14,26,0.7); }
-
-.alert-box.ruptura .alert-title { color: var(--crimson); }
-.alert-box.oport   .alert-title { color: var(--emerald); }
-.alert-box.info    .alert-title { color: var(--blue); }
-.alert-box.aviso   .alert-title { color: var(--gold); }
-
-.progress-bar-wrap {
-  background: var(--border);
-  border-radius: 4px;
-  height: 6px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-}
-
-.result-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  color: rgba(10,14,26,0.3);
-  text-align: center;
-}
-
-.result-placeholder .ph-icon { font-size: 52px; margin-bottom: 16px; opacity: 0.4; }
-.result-placeholder .ph-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
-.result-placeholder .ph-sub { font-size: 13px; }
-
-/* ───── LOADING ───── */
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10,14,26,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
-.loading-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.spinner {
-  width: 44px; height: 44px;
-  border: 3px solid rgba(200,151,42,0.25);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ───── DIVIDER & SECTION LABELS ───── */
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: rgba(10,14,26,0.35);
-  margin: 0 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ───── SCROLLBAR ───── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-/* ───── TOOLTIP ───── */
-[data-tooltip] { position: relative; }
-[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ink);
-  color: #fff;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 5px;
-  white-space: nowrap;
-  pointer-events: none;
-  margin-bottom: 4px;
-  z-index: 100;
-}
-
-/* ───── RESPONSIVE ───── */
-@media (max-width: 1100px) {
-  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-  .charts-grid-2 { grid-template-columns: 1fr; }
-  .charts-grid-3 { grid-template-columns: 1fr; }
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--cream);display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--ink);display:flex;flex-direction:column;border-right:1px solid var(--border);z-index:100;}
+.sidebar-brand{padding:28px 24px 22px;border-bottom:1px solid var(--border);}
+.vexor-logo{font-family:'IM Fell English',Georgia,serif;font-size:28px;letter-spacing:5px;line-height:1;margin-bottom:6px;user-select:none;}
+.vexor-logo .vx-normal{color:#e8e4da;}
+.vexor-logo .vx-accent{color:#c9a84c;}
+.brand-tagline{font-size:10px;color:var(--cream-mute);letter-spacing:2px;text-transform:uppercase;margin-left:2px;}
+.sidebar-section{padding:20px 16px 8px;}
+.sidebar-section-label{font-size:9px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--cream-mute);padding:0 8px;margin-bottom:8px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--radius);cursor:pointer;transition:var(--transition);color:var(--cream-mute);font-size:13.5px;font-weight:400;margin-bottom:2px;border:1px solid transparent;text-decoration:none;}
+.nav-item:hover{background:rgba(232,228,218,0.04);color:var(--cream-dim);}
+.nav-item.active{background:var(--gold-dim);color:var(--gold-light);border-color:rgba(201,168,76,0.2);font-weight:500;}
+.nav-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;background:rgba(232,228,218,0.05);flex-shrink:0;}
+.nav-item.active .nav-icon{background:var(--gold-dim);}
+.nav-badge{margin-left:auto;font-size:9px;padding:2px 7px;border-radius:20px;background:rgba(232,228,218,0.06);color:var(--cream-mute);font-weight:600;letter-spacing:0.5px;}
+.nav-item.active .nav-badge{background:var(--gold-dim);color:var(--gold);}
+.sidebar-footer{margin-top:auto;padding:18px 20px;border-top:1px solid var(--border);}
+.sidebar-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.sidebar-stat-label{font-size:11px;color:var(--cream-mute);}
+.sidebar-stat-value{font-size:11px;color:var(--cream-dim);font-weight:500;}
+.study-badge{margin-top:12px;background:var(--gold-glow);border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--cream-mute);line-height:1.5;}
+.study-badge strong{color:var(--gold);}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);}
+.topbar{background:var(--ink-2);border-bottom:1px solid var(--border);padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'IM Fell English',Georgia,serif;font-size:18px;color:var(--cream);}
+.topbar-subtitle{font-size:11px;color:var(--cream-mute);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.status-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--emerald-light);background:var(--emerald-dim);border:1px solid rgba(42,122,94,0.25);padding:4px 12px;border-radius:20px;font-weight:500;}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--emerald-light);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.content-area{flex:1;overflow-y:auto;padding:26px 32px;scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;}
+.page{display:none;animation:fadeIn 0.28s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* METRIC CARDS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.metric-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;position:relative;overflow:hidden;transition:var(--transition);box-shadow:var(--shadow-sm);}
+.metric-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.metric-card.gold::before{background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.metric-card.emerald::before{background:linear-gradient(90deg,var(--emerald),var(--emerald-light));}
+.metric-card.crimson::before{background:linear-gradient(90deg,var(--crimson),var(--crimson-light));}
+.metric-card.blue::before{background:linear-gradient(90deg,var(--blue),var(--blue-light));}
+.metric-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:14px;}
+.metric-card.gold .metric-icon{background:var(--gold-dim);}
+.metric-card.emerald .metric-icon{background:var(--emerald-dim);}
+.metric-card.crimson .metric-icon{background:var(--crimson-dim);}
+.metric-card.blue .metric-icon{background:var(--blue-dim);}
+.metric-label{font-size:10px;font-weight:500;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;}
+.metric-value{font-family:'IM Fell English',Georgia,serif;font-size:24px;color:var(--cream);line-height:1;margin-bottom:5px;}
+.metric-sub{font-size:11px;color:var(--cream-mute);}
+.metric-badge{position:absolute;top:14px;right:14px;font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;}
+.badge-gold{background:var(--gold-dim);color:var(--gold);}
+.badge-emerald{background:var(--emerald-dim);color:var(--emerald-light);}
+.badge-crimson{background:var(--crimson-dim);color:var(--crimson-light);}
+.badge-blue{background:var(--blue-dim);color:var(--blue-light);}
+
+/* CHARTS */
+.charts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.charts-grid-3{display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px;margin-bottom:18px;}
+.chart-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-sm);}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.chart-title{font-weight:600;font-size:13px;color:var(--cream);}
+.chart-subtitle{font-size:11px;color:var(--cream-mute);margin-top:3px;line-height:1.4;}
+.chart-tag{font-size:9px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;letter-spacing:0.4px;}
+
+/* INSIGHT BOX */
+.insight-box{background:linear-gradient(135deg,var(--ink) 0%,var(--ink-3) 100%);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius-lg);padding:22px 26px;margin-bottom:18px;display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;box-shadow:var(--shadow-md);}
+.insight-icon{font-size:28px;}
+.insight-text strong{font-family:'IM Fell English',Georgia,serif;font-size:16px;display:block;margin-bottom:5px;color:var(--gold-light);}
+.insight-text p{font-size:12.5px;color:var(--cream-mute);line-height:1.55;}
+.insight-stat{text-align:right;}
+.insight-stat .big{font-family:'IM Fell English',Georgia,serif;font-size:32px;color:var(--gold-light);line-height:1;}
+.insight-stat .sm{font-size:10px;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;}
+
+/* SECTION LABEL */
+.section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--cream-mute);margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* SIMULATOR */
+.simulator-layout{display:grid;grid-template-columns:330px 1fr;gap:22px;align-items:start;}
+.sim-form-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);position:sticky;top:0;}
+.sim-form-title{font-family:'IM Fell English',Georgia,serif;font-size:16px;color:var(--cream);margin-bottom:4px;}
+.sim-form-subtitle{font-size:11px;color:var(--cream-mute);margin-bottom:20px;line-height:1.4;}
+.form-group{margin-bottom:15px;}
+.form-label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--cream-mute);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.6px;}
+.toggle-group{display:flex;gap:7px;}
+.toggle-btn{flex:1;padding:8px;border:1px solid var(--border-2);border-radius:8px;background:var(--ink-3);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--cream-mute);cursor:pointer;transition:var(--transition);font-weight:500;}
+.toggle-btn.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold-light);}
+.score-toggle-group{display:flex;gap:6px;}
+.score-btn{flex:1;padding:8px 4px;border:1px solid var(--border-2);border-radius:8px;background:var(--ink-3);font-family:'DM Sans',sans-serif;font-size:11px;color:var(--cream-mute);cursor:pointer;transition:var(--transition);font-weight:500;text-align:center;}
+.score-btn.low.selected{border-color:var(--crimson-light);background:var(--crimson-dim);color:var(--crimson-light);}
+.score-btn.good.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold-light);}
+.score-btn.great.selected{border-color:var(--emerald-light);background:var(--emerald-dim);color:var(--emerald-light);}
+.range-value{font-size:12px;color:var(--gold-light);font-weight:600;text-align:right;margin-bottom:5px;}
+input[type="range"]{width:100%;height:3px;background:var(--border-2);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 2px 8px rgba(201,168,76,0.5);}
+.btn-analisar{width:100%;padding:13px;background:linear-gradient(135deg,var(--ink-3) 0%,var(--ink-4) 100%);border:1px solid rgba(201,168,76,0.3);color:var(--gold-light);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);margin-top:6px;letter-spacing:0.3px;}
+.btn-analisar:hover{background:var(--gold-dim);border-color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,0.2);}
+
+/* RESULT */
+.result-area{display:flex;flex-direction:column;gap:16px;}
+.result-hero{border-radius:var(--radius-lg);padding:24px;display:flex;gap:20px;align-items:center;box-shadow:var(--shadow-sm);}
+.result-hero.potencial{background:var(--ink-2);border:1px solid rgba(201,168,76,0.25);}
+.result-hero.bom{background:var(--ink-2);border:1px solid rgba(42,122,94,0.25);}
+.result-hero.inadimplente{background:var(--ink-2);border:1px solid rgba(160,48,48,0.25);}
+.result-persona-icon{font-size:46px;line-height:1;}
+.result-persona-name{font-family:'IM Fell English',Georgia,serif;font-size:20px;color:var(--cream);margin-bottom:6px;}
+.result-persona-desc{font-size:12.5px;line-height:1.6;color:var(--cream-mute);}
+.result-score-ring{margin-left:auto;text-align:center;}
+.score-ring-value{font-family:'IM Fell English',Georgia,serif;font-size:30px;}
+.score-ring-label{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--cream-mute);}
+.result-metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.result-metric-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.rmc-label{font-size:10px;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;}
+.rmc-value{font-family:'IM Fell English',Georgia,serif;font-size:18px;color:var(--cream);}
+.rmc-sub{font-size:10px;color:var(--cream-mute);margin-top:2px;}
+.alert-box{border-radius:var(--radius);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
+.alert-box.ruptura{background:rgba(160,48,48,0.1);border:1px solid rgba(160,48,48,0.2);}
+.alert-box.oport{background:rgba(42,122,94,0.1);border:1px solid rgba(42,122,94,0.2);}
+.alert-box.info{background:rgba(42,80,144,0.1);border:1px solid rgba(42,80,144,0.2);}
+.alert-box.aviso{background:var(--gold-dim);border:1px solid rgba(201,168,76,0.2);}
+.alert-icon{font-size:18px;margin-top:1px;}
+.alert-title{font-size:12.5px;font-weight:600;margin-bottom:4px;}
+.alert-text{font-size:12px;line-height:1.6;color:var(--cream-mute);}
+.alert-box.ruptura .alert-title{color:var(--crimson-light);}
+.alert-box.oport .alert-title{color:var(--emerald-light);}
+.alert-box.info .alert-title{color:var(--blue-light);}
+.alert-box.aviso .alert-title{color:var(--gold-light);}
+.progress-bar-wrap{background:rgba(232,228,218,0.08);border-radius:4px;height:5px;overflow:hidden;margin-top:8px;}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);}
+.result-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;color:var(--cream-mute);text-align:center;}
+.result-placeholder .ph-icon{font-size:46px;margin-bottom:14px;opacity:0.3;}
+.result-placeholder .ph-title{font-size:15px;font-weight:500;margin-bottom:5px;color:var(--cream-dim);}
+.result-placeholder .ph-sub{font-size:12px;}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(10,12,16,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.loading-overlay.active{opacity:1;pointer-events:all;}
+.spinner{width:40px;height:40px;border:2px solid rgba(201,168,76,0.15);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:10px;}
+@media(max-width:1100px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid-2,.charts-grid-3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- Loading overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-</div>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
 
-<!-- ───── SIDEBAR ───── -->
 <aside id="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-logo">
-      <div class="brand-icon">💳</div>
-      <span class="brand-name">CreditIQ</span>
+    <div class="vexor-logo">
+      <span class="vx-normal">V</span><span class="vx-normal">E</span><span class="vx-accent">X</span><span class="vx-normal">O</span><span class="vx-normal">R</span>
     </div>
-    <div class="brand-tagline">Analytics Platform</div>
+    <div class="brand-tagline">Credit Analytics</div>
   </div>
-
   <div class="sidebar-section">
     <div class="sidebar-section-label">Navegação</div>
     <a class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
-      <div class="nav-icon">📊</div>
-      <span>Dashboard</span>
-      <span class="nav-badge">Macro</span>
+      <div class="nav-icon">📊</div><span>Dashboard</span><span class="nav-badge">Macro</span>
     </a>
     <a class="nav-item" onclick="showPage('simulator')" id="nav-simulator">
-      <div class="nav-icon">🎯</div>
-      <span>Motor de Análise</span>
-      <span class="nav-badge">Micro</span>
+      <div class="nav-icon">🎯</div><span>Motor de Análise</span><span class="nav-badge">Micro</span>
     </a>
   </div>
-
-  <div class="sidebar-section" style="margin-top:8px;">
+  <div class="sidebar-section" style="margin-top:6px;">
     <div class="sidebar-section-label">Estudo</div>
     <div style="padding:0 8px;">
-      <div class="sidebar-stat">
-        <span class="sidebar-stat-label">Base Analisada</span>
-        <span class="sidebar-stat-value">12.500</span>
-      </div>
-      <div class="sidebar-stat">
-        <span class="sidebar-stat-label">Horizonte</span>
-        <span class="sidebar-stat-value">8 meses</span>
-      </div>
-      <div class="sidebar-stat">
-        <span class="sidebar-stat-label">Taxa Rotativo</span>
-        <span class="sidebar-stat-value">15,05% a.m.</span>
-      </div>
-      <div class="sidebar-stat">
-        <span class="sidebar-stat-label">Razão D/R Crítica</span>
-        <span class="sidebar-stat-value">1,10x</span>
-      </div>
+      <div class="sidebar-stat"><span class="sidebar-stat-label">Base Analisada</span><span class="sidebar-stat-value">12.500</span></div>
+      <div class="sidebar-stat"><span class="sidebar-stat-label">Horizonte</span><span class="sidebar-stat-value">8 meses</span></div>
+      <div class="sidebar-stat"><span class="sidebar-stat-label">Taxa Rotativo</span><span class="sidebar-stat-value">15,05% a.m.</span></div>
+      <div class="sidebar-stat"><span class="sidebar-stat-label">Razão D/R Crítica</span><span class="sidebar-stat-value">1,10×</span></div>
     </div>
   </div>
-
   <div class="sidebar-footer">
-    <div class="study-badge">
-      🔬 Descoberta Principal: O <strong style="color:rgba(255,255,255,0.7)">Cliente Potencial</strong> — invisível ao risco, altamente lucrativo ao crédito rotativo.
-    </div>
+    <div class="study-badge">🔬 Descoberta: O <strong>Cliente Potencial</strong> — invisível ao risco, gerador de 98,6% da receita de juros.</div>
   </div>
 </aside>
 
-<!-- ───── MAIN CONTENT ───── -->
 <div id="main">
-
   <div class="topbar">
     <div>
       <div class="topbar-title" id="topbar-title">Dashboard de Segmentação</div>
       <div class="topbar-subtitle" id="topbar-subtitle">Visão macro • 12.500 clientes • 8 meses de dados</div>
     </div>
     <div class="topbar-right">
-      <div class="status-pill">
-        <div class="status-dot"></div>
-        Dados Ativos
-      </div>
+      <div class="status-pill"><div class="status-dot"></div>Dados Ativos</div>
     </div>
   </div>
 
   <div class="content-area">
 
-    <!-- ═══════════════════════════════════════
-         PAGE 1 — DASHBOARD
-    ═══════════════════════════════════════ -->
+    <!-- PAGE 1 -->
     <div class="page active" id="page-dashboard">
-
-      <!-- Insight bar -->
       <div class="insight-box">
         <div class="insight-icon">🔍</div>
         <div class="insight-text">
@@ -904,7 +253,6 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
 
-      <!-- Metric cards -->
       <p class="section-label">Métricas Principais</p>
       <div class="metrics-grid">
         <div class="metric-card gold">
@@ -912,24 +260,24 @@ input[type="range"]::-webkit-slider-thumb {
           <div class="metric-icon">🪙</div>
           <div class="metric-label">Receita — Cliente Potencial</div>
           <div class="metric-value" id="m-receita-pot">...</div>
-          <div class="metric-sub" id="m-pot-pct">58,9% da base • 98,6% da receita</div>
+          <div class="metric-sub">58,9% da base · 98,6% da receita</div>
         </div>
         <div class="metric-card emerald">
           <span class="metric-badge badge-emerald">✅ Estável</span>
           <div class="metric-icon">🛡️</div>
           <div class="metric-label">Receita — Bom Pagador</div>
           <div class="metric-value" id="m-receita-bom">...</div>
-          <div class="metric-sub">32,5% da base • baixa lucratividade</div>
+          <div class="metric-sub">32,5% da base · baixa lucratividade</div>
         </div>
         <div class="metric-card crimson">
           <span class="metric-badge badge-crimson">⚠️ Perda</span>
           <div class="metric-icon">📉</div>
           <div class="metric-label">Impacto — Inadimplentes</div>
           <div class="metric-value" id="m-receita-inad">...</div>
-          <div class="metric-sub">8,7% da base • risco severo de perda</div>
+          <div class="metric-sub">8,7% da base · risco severo de perda</div>
         </div>
         <div class="metric-card blue">
-          <span class="metric-badge badge-blue">📌 Razão D/R</span>
+          <span class="metric-badge badge-blue">📌 D/R</span>
           <div class="metric-icon">⚖️</div>
           <div class="metric-label">Razão Dívida/Renda Média</div>
           <div class="metric-value">1,10×</div>
@@ -937,131 +285,98 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
       </div>
 
-      <!-- Charts row 1 -->
-      <p class="section-label">Análise de Distribuição & Receita</p>
+      <p class="section-label">Distribuição & Receita</p>
       <div class="charts-grid-2">
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">Clientes vs. Receita por Perfil</div>
-              <div class="chart-subtitle">A desproporção invisível: 58,9% dos clientes geram quase 100% da receita de juros</div>
-            </div>
+            <div><div class="chart-title">Clientes vs. Receita por Perfil</div><div class="chart-subtitle">A desproporção invisível: 58,9% dos clientes geram quase 100% da receita</div></div>
             <span class="chart-tag" style="background:var(--gold-dim);color:var(--gold)">Desproporção</span>
           </div>
-          <div id="chart-dist" style="height:280px;"></div>
+          <div id="chart-dist" style="height:270px;"></div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">Evolução Mensal da Receita</div>
-              <div class="chart-subtitle">Crescimento do rotativo ao longo dos 8 meses do estudo</div>
-            </div>
-            <span class="chart-tag" style="background:var(--blue-dim);color:var(--blue)">Temporal</span>
+            <div><div class="chart-title">Evolução Mensal da Receita</div><div class="chart-subtitle">Crescimento do rotativo ao longo dos 8 meses</div></div>
+            <span class="chart-tag" style="background:var(--blue-dim);color:var(--blue-light)">Temporal</span>
           </div>
-          <div id="chart-evolucao" style="height:280px;"></div>
+          <div id="chart-evolucao" style="height:270px;"></div>
         </div>
       </div>
 
-      <!-- Charts row 2 -->
-      <p class="section-label">Análise de Risco & Cronicidade</p>
+      <p class="section-label">Risco & Cronicidade</p>
       <div class="charts-grid-3">
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">Renda Anual vs. Dívida Pendente</div>
-              <div class="chart-subtitle">Zona de risco do Cliente Potencial: razão D/R ≈ 1,10× — dívida supera a renda anual</div>
-            </div>
-            <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson)">Risco</span>
+            <div><div class="chart-title">Renda Anual vs. Dívida Pendente</div><div class="chart-subtitle">Zona de risco: razão D/R ≈ 1,10× — dívida supera a renda anual</div></div>
+            <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Risco</span>
           </div>
-          <div id="chart-scatter" style="height:320px;"></div>
+          <div id="chart-scatter" style="height:310px;"></div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">Cronicidade do Rotativo</div>
-              <div class="chart-subtitle">Pico em 7–8 meses: clientes presos no ciclo do mínimo</div>
-            </div>
+            <div><div class="chart-title">Cronicidade do Rotativo</div><div class="chart-subtitle">Pico em 7–8 meses: clientes presos no ciclo do mínimo</div></div>
             <span class="chart-tag" style="background:var(--gold-dim);color:var(--gold)">Cronicidade</span>
           </div>
-          <div id="chart-hist" style="height:320px;"></div>
+          <div id="chart-hist" style="height:310px;"></div>
         </div>
       </div>
 
-      <!-- Razão D/R Histograma -->
       <p class="section-label">Distribuição da Razão Dívida/Renda</p>
       <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-header">
-          <div>
-            <div class="chart-title">Histograma: Razão Dívida/Renda (D/R) na Carteira</div>
-            <div class="chart-subtitle">Concentração ao redor de 1,10× evidencia a zona crítica do Cliente Potencial — dívida equivalente ou superior à renda anual</div>
-          </div>
-          <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson)">Análise de Pressão</span>
+          <div><div class="chart-title">Histograma: Razão D/R na Carteira</div><div class="chart-subtitle">Concentração ao redor de 1,10× evidencia a zona crítica do Cliente Potencial</div></div>
+          <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Pressão Financeira</span>
         </div>
-        <div id="chart-razao" style="height:240px;"></div>
+        <div id="chart-razao" style="height:230px;"></div>
       </div>
-
     </div>
 
-    <!-- ═══════════════════════════════════════
-         PAGE 2 — SIMULATOR
-    ═══════════════════════════════════════ -->
+    <!-- PAGE 2 -->
     <div class="page" id="page-simulator">
       <div class="simulator-layout">
-
-        <!-- Form -->
         <div class="sim-form-card">
-          <div class="sim-form-title">Motor de Análise Individual</div>
+          <div class="sim-form-title">Análise Individual</div>
           <div class="sim-form-subtitle">Insira os dados do cliente para classificação de risco e projeção de lucratividade.</div>
-
-          <p class="section-label" style="margin-bottom:14px;">Perfil do Cliente</p>
+          <p class="section-label" style="margin-bottom:13px;">Perfil do Cliente</p>
 
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">🎂</span> Idade</div>
+            <div class="form-label"><span>🎂</span> Idade</div>
             <div class="range-value" id="idade-display">35 anos</div>
             <input type="range" id="input-idade" min="18" max="80" value="35" oninput="updateRange('idade')"/>
           </div>
-
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">💰</span> Salário Mensal Líquido</div>
+            <div class="form-label"><span>💰</span> Salário Mensal Líquido</div>
             <div class="range-value" id="salario-display">R$ 5.000</div>
             <input type="range" id="input-salario" min="1000" max="30000" step="500" value="5000" oninput="updateRange('salario')"/>
           </div>
-
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">📈</span> Score de Crédito</div>
+            <div class="form-label"><span>📈</span> Score de Crédito</div>
             <div class="score-toggle-group">
-              <button class="score-btn low selected" onclick="selectScore('Baixo', this)">🔴 Baixo<br><small style="font-size:10px;font-weight:400">&lt;500</small></button>
-              <button class="score-btn good" onclick="selectScore('Bom', this)">🟡 Bom<br><small style="font-size:10px;font-weight:400">500–750</small></button>
-              <button class="score-btn great" onclick="selectScore('Ótimo', this)">🟢 Ótimo<br><small style="font-size:10px;font-weight:400">&gt;750</small></button>
+              <button class="score-btn low selected" onclick="selectScore('Baixo',this)">🔴 Baixo<br><small style="font-size:10px;font-weight:400">&lt;500</small></button>
+              <button class="score-btn good" onclick="selectScore('Bom',this)">🟡 Bom<br><small style="font-size:10px;font-weight:400">500–750</small></button>
+              <button class="score-btn great" onclick="selectScore('Ótimo',this)">🟢 Ótimo<br><small style="font-size:10px;font-weight:400">&gt;750</small></button>
             </div>
           </div>
-
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">⏰</span> Histórico de Atrasos</div>
+            <div class="form-label"><span>⏰</span> Histórico de Atrasos</div>
             <div class="toggle-group">
               <button class="toggle-btn selected" id="btn-atraso-sim" onclick="selectAtraso(true)">✓ Sim</button>
               <button class="toggle-btn" id="btn-atraso-nao" onclick="selectAtraso(false)">✗ Não</button>
             </div>
           </div>
-
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">💳</span> Dívida Pendente Total</div>
+            <div class="form-label"><span>💳</span> Dívida Pendente Total</div>
             <div class="range-value" id="divida-display">R$ 10.000</div>
             <input type="range" id="input-divida" min="500" max="100000" step="500" value="10000" oninput="updateRange('divida')"/>
           </div>
-
           <div class="form-group">
-            <div class="form-label"><span class="form-label-icon">📅</span> Meses no Rotativo</div>
+            <div class="form-label"><span>📅</span> Meses no Rotativo</div>
             <div class="range-value" id="meses-display">6 meses</div>
             <input type="range" id="input-meses" min="1" max="8" value="6" oninput="updateRange('meses')"/>
           </div>
-
-          <button class="btn-analisar" onclick="analisarCliente()">
-            ⚡ Analisar Cliente
-          </button>
+          <button class="btn-analisar" onclick="analisarCliente()">⚡ Analisar Cliente</button>
         </div>
 
-        <!-- Result -->
         <div class="result-area" id="result-area">
           <div class="result-placeholder">
             <div class="ph-icon">🎯</div>
@@ -1069,479 +384,149 @@ input[type="range"]::-webkit-slider-thumb {
             <div class="ph-sub">Preencha os dados ao lado e clique em<br>"Analisar Cliente" para ver os resultados.</div>
           </div>
         </div>
-
       </div>
     </div>
 
-  </div><!-- /content-area -->
-</div><!-- /main -->
+  </div>
+</div>
 
 <script>
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let selectedScore = "Baixo";
-let selectedAtrasos = true;
-const GOLD   = "#C8972A";
-const EMERALD= "#1A7A5E";
-const CRIMSON= "#B02A2A";
-const BLUE   = "#2557A7";
-const INK    = "#0A0E1A";
+let selectedScore="Baixo",selectedAtrasos=true;
+const GOLD="#c9a84c",GOLD_L="#e2c46e",EMERALD_L="#35a07a",CRIMSON_L="#c44444",BLUE_L="#3b6bbf",CREAM="#e8e4da";
+const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{family:'DM Sans,sans-serif',color:'#e8e4da',size:11},margin:{l:48,r:16,t:8,b:40},legend:{bgcolor:'transparent',borderwidth:0,font:{size:11,color:'#e8e4da'}},xaxis:{gridcolor:'rgba(232,228,218,0.06)',zerolinecolor:'rgba(232,228,218,0.1)',tickfont:{size:10,color:'rgba(232,228,218,0.5)'}},yaxis:{gridcolor:'rgba(232,228,218,0.06)',zerolinecolor:'rgba(232,228,218,0.1)',tickfont:{size:10,color:'rgba(232,228,218,0.5)'}}};
+const PC={displayModeBar:false,responsive:true};
 
-// ─────────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.getElementById('nav-' + id).classList.add('active');
-
-  const titles = {
-    dashboard: ["Dashboard de Segmentação", "Visão macro • 12.500 clientes • 8 meses de dados"],
-    simulator: ["Motor de Análise de Crédito", "Simulador individual de classificação e lucratividade"],
-  };
-  document.getElementById('topbar-title').textContent = titles[id][0];
-  document.getElementById('topbar-subtitle').textContent = titles[id][1];
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  const t={dashboard:["Dashboard de Segmentação","Visão macro • 12.500 clientes • 8 meses de dados"],simulator:["Motor de Análise de Crédito","Simulador individual de classificação e lucratividade"]};
+  document.getElementById('topbar-title').textContent=t[id][0];
+  document.getElementById('topbar-subtitle').textContent=t[id][1];
 }
 
-// ─────────────────────────────────────────────
-// FORM HELPERS
-// ─────────────────────────────────────────────
-function updateRange(field) {
-  const map = {
-    idade:  { id: 'input-idade',  disp: 'idade-display',  fmt: v => v + ' anos' },
-    salario:{ id: 'input-salario',disp: 'salario-display', fmt: v => 'R$ ' + Number(v).toLocaleString('pt-BR') },
-    divida: { id: 'input-divida', disp: 'divida-display',  fmt: v => 'R$ ' + Number(v).toLocaleString('pt-BR') },
-    meses:  { id: 'input-meses',  disp: 'meses-display',   fmt: v => v + (v==1?' mês':' meses') },
-  };
-  const m = map[field];
-  const v = document.getElementById(m.id).value;
-  document.getElementById(m.disp).textContent = m.fmt(v);
+function updateRange(f){
+  const m={idade:{id:'input-idade',disp:'idade-display',fmt:v=>v+' anos'},salario:{id:'input-salario',disp:'salario-display',fmt:v=>'R$ '+Number(v).toLocaleString('pt-BR')},divida:{id:'input-divida',disp:'divida-display',fmt:v=>'R$ '+Number(v).toLocaleString('pt-BR')},meses:{id:'input-meses',disp:'meses-display',fmt:v=>v+(v==1?' mês':' meses')}};
+  document.getElementById(m[f].disp).textContent=m[f].fmt(document.getElementById(m[f].id).value);
 }
 
-function selectScore(val, btn) {
-  selectedScore = val;
-  document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+function selectScore(v,b){selectedScore=v;document.querySelectorAll('.score-btn').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}
+function selectAtraso(v){selectedAtrasos=v;document.getElementById('btn-atraso-sim').classList.toggle('selected',v);document.getElementById('btn-atraso-nao').classList.toggle('selected',!v);}
+function fmtBRL(v){if(Math.abs(v)>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$ '+(v/1e3).toFixed(1)+'K';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+async function loadDashboard(){
+  const d=await(await fetch('/api/dashboard-data')).json(),m=d.metricas;
+  document.getElementById('big-receita-total').textContent=fmtBRL(m.receita_total);
+  document.getElementById('m-receita-pot').textContent=fmtBRL(m.receita_potencial);
+  document.getElementById('m-receita-bom').textContent=fmtBRL(m.receita_bom);
+  document.getElementById('m-receita-inad').textContent=fmtBRL(m.receita_inadimplente);
+  renderDist(d);renderEvolucao(d);renderScatter(d);renderHist(d);renderRazao(d);
 }
 
-function selectAtraso(val) {
-  selectedAtrasos = val;
-  document.getElementById('btn-atraso-sim').classList.toggle('selected', val);
-  document.getElementById('btn-atraso-nao').classList.toggle('selected', !val);
+function renderDist(d){
+  const m=d.metricas,p=['Cliente Potencial','Bom Pagador','Inadimplente'];
+  const pc=[m.pct_potencial,m.pct_bom,m.pct_inadimplente];
+  const rec=[m.receita_potencial,m.receita_bom,Math.abs(m.receita_inadimplente)];
+  const tot=rec.reduce((a,b)=>a+b,0),pr=rec.map(r=>(r/tot*100).toFixed(1));
+  const c=[GOLD,EMERALD_L,CRIMSON_L];
+  Plotly.newPlot('chart-dist',[
+    {x:p,y:pc,name:'% Clientes',type:'bar',marker:{color:c,opacity:0.3},text:pc.map(v=>v+'%'),textposition:'outside',textfont:{size:10,color:CREAM},hovertemplate:'<b>%{x}</b><br>Clientes: %{y}%<extra></extra>',offsetgroup:1},
+    {x:p,y:pr.map(Number),name:'% Receita',type:'bar',marker:{color:c},text:pr.map(v=>v+'%'),textposition:'outside',textfont:{size:10,color:CREAM},hovertemplate:'<b>%{x}</b><br>Receita: %{y}%<extra></extra>',offsetgroup:2},
+  ],{...PL,barmode:'group',yaxis:{...PL.yaxis,ticksuffix:'%',range:[0,120]},legend:{...PL.legend,orientation:'h',y:-0.2},margin:{...PL.margin,b:60},bargap:0.25,bargroupgap:0.05},PC);
 }
 
-// ─────────────────────────────────────────────
-// FORMAT HELPERS
-// ─────────────────────────────────────────────
-function fmtBRL(v) {
-  if(Math.abs(v)>=1_000_000) return 'R$ ' + (v/1_000_000).toFixed(1) + 'M';
-  if(Math.abs(v)>=1_000)     return 'R$ ' + (v/1_000).toFixed(1) + 'K';
-  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+function renderEvolucao(d){
+  const e=d.evolucao;
+  Plotly.newPlot('chart-evolucao',[
+    {x:e.meses,y:e.potencial,name:'Cliente Potencial',mode:'lines+markers',line:{color:GOLD,width:2.5,shape:'spline'},marker:{size:5,color:GOLD,line:{color:'#0a0c10',width:2}},fill:'tonexty',fillcolor:'rgba(201,168,76,0.05)',hovertemplate:'<b>Cliente Potencial</b><br>%{x}: R$%{y}M<extra></extra>'},
+    {x:e.meses,y:e.bom,name:'Bom Pagador',mode:'lines+markers',line:{color:EMERALD_L,width:2,shape:'spline'},marker:{size:4,color:EMERALD_L},hovertemplate:'<b>Bom Pagador</b><br>%{x}: R$%{y}M<extra></extra>'},
+    {x:e.meses,y:e.inadimplente,name:'Inadimplente (Perda)',mode:'lines+markers',line:{color:CRIMSON_L,width:2,dash:'dot',shape:'spline'},marker:{size:4,color:CRIMSON_L},hovertemplate:'<b>Inadimplente</b><br>%{x}: R$%{y}M<extra></extra>'},
+  ],{...PL,yaxis:{...PL.yaxis,tickprefix:'R$ ',ticksuffix:'M'},legend:{...PL.legend,orientation:'h',y:-0.22},margin:{...PL.margin,b:60}},PC);
 }
 
-const PLOTLY_LAYOUT = {
-  paper_bgcolor: 'transparent',
-  plot_bgcolor:  'transparent',
-  font: { family: 'DM Sans, sans-serif', color: '#0A0E1A', size: 12 },
-  margin: { l:48, r:16, t:8, b:40 },
-  legend: { bgcolor: 'transparent', borderwidth: 0, font:{size:12} },
-  xaxis: { gridcolor: 'rgba(45,52,82,0.07)', zerolinecolor: 'rgba(45,52,82,0.12)', tickfont:{size:11} },
-  yaxis: { gridcolor: 'rgba(45,52,82,0.07)', zerolinecolor: 'rgba(45,52,82,0.12)', tickfont:{size:11} },
-};
-const PLOTLY_CFG = { displayModeBar: false, responsive: true };
-
-// ─────────────────────────────────────────────
-// LOAD DASHBOARD DATA
-// ─────────────────────────────────────────────
-async function loadDashboard() {
-  const res  = await fetch('/api/dashboard-data');
-  const data = await res.json();
-  const m    = data.metricas;
-
-  // Metrics
-  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_total);
-  document.getElementById('m-receita-pot').textContent = fmtBRL(m.receita_potencial);
-  document.getElementById('m-receita-bom').textContent = fmtBRL(m.receita_bom);
-  document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
-
-  renderChartDist(data);
-  renderChartEvolucao(data);
-  renderChartScatter(data);
-  renderChartHist(data);
-  renderChartRazao(data);
+function renderScatter(d){
+  const g={'Bom Pagador':[],'Inadimplente':[],'Cliente Potencial':[]};
+  d.scatter.forEach(p=>g[p.perfil].push(p));
+  const cm={'Cliente Potencial':GOLD,'Bom Pagador':EMERALD_L,'Inadimplente':CRIMSON_L};
+  const tr=Object.entries(g).map(([p,pts])=>({x:pts.map(x=>x.renda),y:pts.map(x=>x.divida),mode:'markers',name:p,marker:{color:cm[p],size:4.5,opacity:0.6,line:{width:0}},text:pts.map(x=>`D/R: ${x.razao}×`),hovertemplate:`<b>${p}</b><br>Renda: R$%{x:,.0f}<br>Dívida: R$%{y:,.0f}<br>%{text}<extra></extra>`}));
+  tr.push({x:[0,200000],y:[0,220000],mode:'lines',name:'D/R = 1,10×',line:{color:'rgba(201,168,76,0.6)',width:1.5,dash:'dash'},hoverinfo:'none',showlegend:true});
+  Plotly.newPlot('chart-scatter',tr,{...PL,xaxis:{...PL.xaxis,title:'Renda Anual (R$)',tickprefix:'R$',tickformat:'~s',range:[0,200000]},yaxis:{...PL.yaxis,title:'Dívida Pendente (R$)',tickprefix:'R$',tickformat:'~s',range:[0,200000]},legend:{...PL.legend,orientation:'h',y:-0.22},margin:{l:60,r:16,t:8,b:70},shapes:[{type:'rect',x0:50000,x1:90000,y0:50000,y1:120000,fillcolor:'rgba(201,168,76,0.06)',line:{color:'rgba(201,168,76,0.2)',width:1,dash:'dot'}}],annotations:[{x:70000,y:142000,text:'⚠ Zona Crítica',showarrow:false,font:{size:10,color:GOLD},xref:'x',yref:'y'}]},PC);
 }
 
-// ─────────────────────────────────────────────
-// CHART 1: Clientes vs Receita (lado a lado)
-// ─────────────────────────────────────────────
-function renderChartDist(data) {
-  const m = data.metricas;
-  const perfis = ['Cliente Potencial', 'Bom Pagador', 'Inadimplente'];
-  const pct_clientes = [m.pct_potencial, m.pct_bom, m.pct_inadimplente];
-  const receitas = [m.receita_potencial, m.receita_bom, Math.abs(m.receita_inadimplente)];
-  const receita_total_pos = m.receita_potencial + m.receita_bom + Math.abs(m.receita_inadimplente);
-  const pct_receita = receitas.map(r => (r/receita_total_pos*100).toFixed(1));
-  const cores = [GOLD, EMERALD, CRIMSON];
-
-  const trace1 = {
-    x: perfis, y: pct_clientes, name: '% de Clientes',
-    type: 'bar', marker: { color: cores, opacity: 0.3 },
-    text: pct_clientes.map(v => v + '%'), textposition: 'outside', textfont:{size:11},
-    hovertemplate: '<b>%{x}</b><br>Clientes: %{y}%<extra></extra>',
-    yaxis: 'y', offsetgroup: 1,
-  };
-
-  const trace2 = {
-    x: perfis, y: pct_receita.map(Number), name: '% da Receita',
-    type: 'bar', marker: { color: cores },
-    text: pct_receita.map(v => v + '%'), textposition: 'outside', textfont:{size:11, color:'#fff'},
-    hovertemplate: '<b>%{x}</b><br>Receita: %{y}%<extra></extra>',
-    yaxis: 'y', offsetgroup: 2,
-  };
-
-  const layout = {
-    ...PLOTLY_LAYOUT,
-    barmode: 'group',
-    yaxis: { ...PLOTLY_LAYOUT.yaxis, ticksuffix:'%', range:[0,120] },
-    legend: { ...PLOTLY_LAYOUT.legend, orientation:'h', y:-0.18 },
-    margin: { ...PLOTLY_LAYOUT.margin, b: 60 },
-    bargap: 0.25,
-    bargroupgap: 0.05,
-    shapes: [{
-      type:'line', x0:-0.5, x1:2.5, y0:58.9, y1:58.9,
-      line:{color:'rgba(200,151,42,0.3)', width:1.5, dash:'dot'}
-    }],
-  };
-
-  Plotly.newPlot('chart-dist', [trace1, trace2], layout, PLOTLY_CFG);
+function renderHist(d){
+  const h=d.hist_meses,m=Object.keys(h).map(Number),c=Object.values(h);
+  const cr=c.map((_,i)=>(i===6||i===7)?GOLD:'rgba(232,228,218,0.12)');
+  Plotly.newPlot('chart-hist',[{x:m.map(x=>`${x} mês${x>1?'es':''}`),y:c,type:'bar',marker:{color:cr,line:{width:0}},text:c.map(v=>v.toLocaleString('pt-BR')),textposition:'outside',textfont:{size:9,color:CREAM},hovertemplate:'<b>%{x}</b><br>Clientes: %{y:,}<extra></extra>'}],{...PL,yaxis:{...PL.yaxis,title:'Nº de Clientes'},xaxis:{...PL.xaxis,title:'Meses no Rotativo'},margin:{l:60,r:16,t:16,b:50},annotations:[{x:'7 meses',y:c[6]*1.13,text:'⭐ Pico Crônico',showarrow:false,font:{size:9,color:GOLD},xref:'x',yref:'y'}]},PC);
 }
 
-// ─────────────────────────────────────────────
-// CHART 2: Evolução Mensal
-// ─────────────────────────────────────────────
-function renderChartEvolucao(data) {
-  const ev = data.evolucao;
-
-  const traces = [
-    {
-      x: ev.meses, y: ev.potencial, name: 'Cliente Potencial',
-      mode: 'lines+markers', line: {color: GOLD, width: 2.5, shape:'spline'},
-      marker: {size:6, color:GOLD, line:{color:'#fff',width:2}},
-      fill: 'tonexty', fillcolor: 'rgba(200,151,42,0.07)',
-      hovertemplate: '<b>Cliente Potencial</b><br>%{x}: R$ %{y}M<extra></extra>',
-    },
-    {
-      x: ev.meses, y: ev.bom, name: 'Bom Pagador',
-      mode: 'lines+markers', line: {color: EMERALD, width:2, shape:'spline'},
-      marker: {size:5, color:EMERALD},
-      hovertemplate: '<b>Bom Pagador</b><br>%{x}: R$ %{y}M<extra></extra>',
-    },
-    {
-      x: ev.meses, y: ev.inadimplente, name: 'Inadimplente (Perda)',
-      mode: 'lines+markers', line: {color: CRIMSON, width:2, dash:'dot', shape:'spline'},
-      marker: {size:5, color:CRIMSON},
-      hovertemplate: '<b>Inadimplente</b><br>%{x}: R$ %{y}M<extra></extra>',
-    },
-  ];
-
-  const layout = {
-    ...PLOTLY_LAYOUT,
-    yaxis: { ...PLOTLY_LAYOUT.yaxis, tickprefix:'R$ ', ticksuffix:'M' },
-    legend: { ...PLOTLY_LAYOUT.legend, orientation:'h', y:-0.22 },
-    margin: { ...PLOTLY_LAYOUT.margin, b: 60 },
-  };
-
-  Plotly.newPlot('chart-evolucao', traces, layout, PLOTLY_CFG);
+function renderRazao(d){
+  const r=d.razao_hist,c=r.bins.map(b=>b>=1.0&&b<=1.3?GOLD:b>=1.3?CRIMSON_L:'rgba(42,80,144,0.5)');
+  Plotly.newPlot('chart-razao',[{x:r.bins.map(b=>b.toFixed(1)+'×'),y:r.counts,type:'bar',marker:{color:c,line:{width:0}},hovertemplate:'D/R: %{x}<br>Clientes: %{y:,}<extra></extra>'}],{...PL,yaxis:{...PL.yaxis,title:'Nº de Clientes'},xaxis:{...PL.xaxis,title:'Razão Dívida/Renda'},margin:{l:60,r:16,t:8,b:50},shapes:[{type:'rect',x0:'0.9×',x1:'1.3×',y0:0,y1:2100,fillcolor:'rgba(201,168,76,0.06)',line:{color:'rgba(201,168,76,0.2)',width:1}}],annotations:[{x:'1.1×',y:2060,text:'⚠ Zona Potencial (D/R 1,0–1,3×)',showarrow:false,font:{size:10,color:GOLD},xref:'x',yref:'y'}]},PC);
 }
 
-// ─────────────────────────────────────────────
-// CHART 3: Scatter — Renda vs Dívida
-// ─────────────────────────────────────────────
-function renderChartScatter(data) {
-  const pontos = data.scatter;
-  const grupos = { 'Bom Pagador': [], 'Inadimplente': [], 'Cliente Potencial': [] };
-  pontos.forEach(p => grupos[p.perfil].push(p));
-
-  const corMap = { 'Cliente Potencial': GOLD, 'Bom Pagador': EMERALD, 'Inadimplente': CRIMSON };
-  const opMap  = { 'Cliente Potencial': 0.65, 'Bom Pagador': 0.55, 'Inadimplente': 0.6 };
-
-  const traces = Object.entries(grupos).map(([perfil, pts]) => ({
-    x: pts.map(p => p.renda),
-    y: pts.map(p => p.divida),
-    mode: 'markers',
-    name: perfil,
-    marker: { color: corMap[perfil], size: 5, opacity: opMap[perfil], line:{width:0} },
-    text: pts.map(p => `D/R: ${p.razao}×`),
-    hovertemplate: `<b>${perfil}</b><br>Renda: R$%{x:,.0f}<br>Dívida: R$%{y:,.0f}<br>%{text}<extra></extra>`,
-  }));
-
-  // Linha D/R = 1.10x
-  traces.push({
-    x: [0, 200000], y: [0, 220000], mode:'lines', name:'D/R = 1,10× (zona crítica)',
-    line: {color:'rgba(200,151,42,0.7)', width:1.5, dash:'dash'},
-    hoverinfo: 'none', showlegend: true,
-  });
-
-  const layout = {
-    ...PLOTLY_LAYOUT,
-    xaxis: { ...PLOTLY_LAYOUT.xaxis, title:'Renda Anual (R$)', tickprefix:'R$', tickformat:'~s', range:[0, 200000] },
-    yaxis: { ...PLOTLY_LAYOUT.yaxis, title:'Dívida Pendente (R$)', tickprefix:'R$', tickformat:'~s', range:[0, 200000] },
-    legend: { ...PLOTLY_LAYOUT.legend, orientation:'h', y:-0.22 },
-    margin: { l:60, r:16, t:8, b:70 },
-    shapes: [{
-      type: 'rect', x0:50000, x1:90000, y0:50000, y1:120000,
-      fillcolor:'rgba(200,151,42,0.07)', line:{color:'rgba(200,151,42,0.25)', width:1, dash:'dot'},
-    }],
-    annotations: [{
-      x: 70000, y: 140000, text:'⚠ Zona Crítica', showarrow:false,
-      font:{size:10, color:GOLD}, xref:'x', yref:'y',
-    }],
-  };
-
-  Plotly.newPlot('chart-scatter', traces, layout, PLOTLY_CFG);
+async function analisarCliente(){
+  document.getElementById('loadingOverlay').classList.add('active');
+  const p={idade:parseInt(document.getElementById('input-idade').value),salario_mensal:parseFloat(document.getElementById('input-salario').value),score:selectedScore,atrasos:selectedAtrasos,divida_pendente:parseFloat(document.getElementById('input-divida').value),meses_rotativo:parseInt(document.getElementById('input-meses').value)};
+  try{renderResultado(await(await fetch('/api/analisar-cliente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)})).json(),p);}
+  finally{document.getElementById('loadingOverlay').classList.remove('active');}
 }
 
-// ─────────────────────────────────────────────
-// CHART 4: Histograma Meses no Rotativo
-// ─────────────────────────────────────────────
-function renderChartHist(data) {
-  const hist = data.hist_meses;
-  const meses = Object.keys(hist).map(Number);
-  const counts = Object.values(hist);
+function renderResultado(r,inp){
+  const area=document.getElementById('result-area');
+  const pm={potencial:{label:'Cliente Potencial',icon:'🪙',cls:'potencial',color:GOLD,cv:'var(--gold)'},bom:{label:'Bom Pagador',icon:'🛡️',cls:'bom',color:EMERALD_L,cv:'var(--emerald-light)'},inadimplente:{label:'Inadimplente',icon:'⚠️',cls:'inadimplente',color:CRIMSON_L,cv:'var(--crimson-light)'}};
+  const p=pm[r.perfil];
+  const dm={potencial:`Perfil <b style="color:${p.cv}">altamente lucrativo</b> e invisível ao risco tradicional. Paga o mínimo, entra cronicamente no rotativo. Razão D/R de <b style="color:${p.cv}">${r.razao_divida_renda}×</b> indica pressão financeira estrutural.`,bom:`Perfil <b style="color:${p.cv}">confiável e seguro</b>. Honra compromissos integralmente, mas gera <b>baixíssima receita de juros</b>. Prioridade: retenção e cross-sell.`,inadimplente:`Perfil de <b style="color:${p.cv}">risco severo</b>. Histórico de atrasos com alta pressão de dívida. Ação imediata de cobrança recomendada.`};
 
-  const cores = counts.map((_, i) =>
-    (i === 6 || i === 7) ? GOLD : 'rgba(45,52,82,0.18)'
-  );
+  let h=`<div class="result-hero ${p.cls}"><div class="result-persona-icon">${p.icon}</div><div><div class="result-persona-name">${p.label}</div><div class="result-persona-desc">${dm[r.perfil]}</div></div><div class="result-score-ring"><div class="score-ring-value" style="color:${p.color}">${r.score_interno}</div><div class="score-ring-label">Score Interno</div></div></div>`;
+  h+=`<p class="section-label">Indicadores Calculados</p><div class="result-metrics-grid">`;
 
-  const trace = {
-    x: meses.map(m => `${m} mês${m>1?'es':''}`),
-    y: counts,
-    type: 'bar',
-    marker: { color: cores, line:{width:0} },
-    text: counts.map(v => v.toLocaleString('pt-BR')),
-    textposition: 'outside',
-    textfont: {size:10, color: INK},
-    hovertemplate: '<b>%{x}</b><br>Clientes: %{y:,}<extra></extra>',
-  };
-
-  const layout = {
-    ...PLOTLY_LAYOUT,
-    yaxis: { ...PLOTLY_LAYOUT.yaxis, title:'Nº de Clientes' },
-    xaxis: { ...PLOTLY_LAYOUT.xaxis, title:'Meses no Rotativo' },
-    margin: { l:60, r:16, t:16, b:50 },
-    annotations: [{
-      x: '7 meses', y: counts[6] * 1.12,
-      text: '⭐ Pico Crônico', showarrow:false,
-      font:{size:10, color:GOLD}, xref:'x', yref:'y',
-    }],
-  };
-
-  Plotly.newPlot('chart-hist', [trace], layout, PLOTLY_CFG);
-}
-
-// ─────────────────────────────────────────────
-// CHART 5: Razão D/R Histograma
-// ─────────────────────────────────────────────
-function renderChartRazao(data) {
-  const rh = data.razao_hist;
-
-  const cores = rh.bins.map(b => {
-    if(b >= 1.0 && b <= 1.3) return GOLD;
-    if(b >= 1.3) return CRIMSON;
-    return 'rgba(37,87,167,0.3)';
-  });
-
-  const trace = {
-    x: rh.bins.map(b => b.toFixed(1) + '×'),
-    y: rh.counts,
-    type: 'bar',
-    marker: { color: cores, line:{width:0} },
-    hovertemplate: 'D/R: %{x}<br>Clientes: %{y:,}<extra></extra>',
-  };
-
-  const layout = {
-    ...PLOTLY_LAYOUT,
-    yaxis: { ...PLOTLY_LAYOUT.yaxis, title:'Nº de Clientes' },
-    xaxis: { ...PLOTLY_LAYOUT.xaxis, title:'Razão Dívida/Renda' },
-    margin: { l:60, r:16, t:8, b:50 },
-    shapes: [
-      { type:'rect', x0:'0.9×', x1:'1.3×', y0:0, y1:2100,
-        fillcolor:'rgba(200,151,42,0.07)', line:{color:'rgba(200,151,42,0.25)', width:1} },
-    ],
-    annotations: [{
-      x: '1.1×', y: 2050, text:'⚠ Zona Potencial (D/R 1,0–1,3×)',
-      showarrow:false, font:{size:10, color:GOLD}, xref:'x', yref:'y',
-    }],
-  };
-
-  Plotly.newPlot('chart-razao', [trace], layout, PLOTLY_CFG);
-}
-
-// ─────────────────────────────────────────────
-// SIMULATOR
-// ─────────────────────────────────────────────
-async function analisarCliente() {
-  const overlay = document.getElementById('loadingOverlay');
-  overlay.classList.add('active');
-
-  const payload = {
-    idade:          parseInt(document.getElementById('input-idade').value),
-    salario_mensal: parseFloat(document.getElementById('input-salario').value),
-    score:          selectedScore,
-    atrasos:        selectedAtrasos,
-    divida_pendente: parseFloat(document.getElementById('input-divida').value),
-    meses_rotativo:  parseInt(document.getElementById('input-meses').value),
-  };
-
-  try {
-    const res  = await fetch('/api/analisar-cliente', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-    });
-    const r = await res.json();
-    renderResultado(r, payload);
-  } finally {
-    overlay.classList.remove('active');
+  if(r.perfil==='potencial'){
+    h+=mc('Juros Mensais Gerados',fmtBRL(r.receita_mensal_juros),'Taxa 15,05% a.m.',GOLD);
+    h+=mc('Receita Projetada ('+r.meses_rotativo+'m)',fmtBRL(r.receita_projetada_8m),'Se permanecer no rotativo',GOLD);
+    h+=mc('Comprometimento Atual',r.comprometimento_atual_pct+'%','da renda com mínimo',r.comprometimento_atual_pct>30?CRIMSON_L:GOLD);
+    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Média de risco: 1,10×',r.razao_divida_renda>1.0?CRIMSON_L:EMERALD_L);
+    h+=mc('Crédito Adicional Máx.',fmtBRL(r.credito_adicional_max),'Limite: 30% comprometimento',BLUE_L);
+    h+=mc('Mín. Sobre Nova Oferta',fmtBRL(r.credito_adicional_max*0.05),'Pagamento mín. adicional',BLUE_L);
+  }else if(r.perfil==='bom'){
+    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Confortável — baixo risco',EMERALD_L);
+    h+=mc('Score Interno',r.score_interno+'/100','Pontuação Vexor',EMERALD_L);
+    h+=mc('Comprometimento',r.comprometimento_atual_pct+'%','da renda',EMERALD_L);
+    h+=mc('Receita de Juros',fmtBRL(r.receita_mensal_juros),'Muito baixa',BLUE_L);
+    h+=mc('Potencial Cross-sell',fmtBRL(r.credito_adicional_max*1.5),'Limite adicional sugerido',BLUE_L);
+    h+=mc('Prob. de Ruptura',r.prob_ruptura+'%','Muito baixa',EMERALD_L);
+  }else{
+    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Nível crítico',CRIMSON_L);
+    h+=mc('Score Interno',r.score_interno+'/100','Pontuação Vexor',CRIMSON_L);
+    h+=mc('Prob. de Ruptura',r.prob_ruptura+'%','Alto risco',CRIMSON_L);
+    h+=mc('Comprometimento',r.comprometimento_atual_pct+'%','da renda',CRIMSON_L);
+    h+=mc('Exposição em Dívida',fmtBRL(inp.divida_pendente),'Perda potencial',CRIMSON_L);
+    h+=mc('Ação Recomendada','Bloqueio','Sem crédito adicional',CRIMSON_L);
   }
-}
+  h+=`</div>`;
 
-function renderResultado(r, input) {
-  const area = document.getElementById('result-area');
+  const cp=Math.min(100,r.comprometimento_atual_pct),cc=cp>35?CRIMSON_L:cp>25?GOLD:EMERALD_L;
+  h+=`<p class="section-label">Comprometimento de Renda</p><div class="chart-card" style="padding:16px 18px;"><div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:11px;color:var(--cream-mute)">Comprometimento com pagamento mínimo</span><span style="font-size:12px;font-weight:600;color:${cc}">${r.comprometimento_atual_pct}% da renda</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${cp}%;background:${cc}"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;"><span style="font-size:9px;color:var(--cream-mute)">0%</span><span style="font-size:9px;color:var(--emerald-light)">Ideal: até 25%</span><span style="font-size:9px;color:var(--gold)">Máx: 30%</span><span style="font-size:9px;color:var(--crimson-light)">Crítico: &gt;35%</span><span style="font-size:9px;color:var(--cream-mute)">100%</span></div></div>`;
 
-  const perfilMap = {
-    potencial:    { label:'Cliente Potencial', icon:'🪙', class:'potencial', color: GOLD,    colorVar:'var(--gold)' },
-    bom:          { label:'Bom Pagador',        icon:'🛡️', class:'bom',       color: EMERALD, colorVar:'var(--emerald)' },
-    inadimplente: { label:'Inadimplente',       icon:'⚠️', class:'inadimplente', color: CRIMSON, colorVar:'var(--crimson)' },
-  };
-
-  const p = perfilMap[r.perfil];
-
-  const descMap = {
-    potencial: `Perfil <b style="color:${p.colorVar}">altamente lucrativo</b> e invisível ao risco tradicional. Paga o mínimo, entra cronicamente no rotativo. Razão D/R de <b style="color:${p.colorVar}">${r.razao_divida_renda}×</b> indica pressão financeira estrutural.`,
-    bom: `Perfil <b style="color:${p.colorVar}">confiável e seguro</b>. Honra compromissos integralmente, mas gera <b>baixíssima receita de juros</b> para a instituição. Prioridade: retenção e cross-sell de produtos.`,
-    inadimplente: `Perfil de <b style="color:${p.colorVar}">risco severo</b>. Histórico de atrasos combinado com pressão de dívida sugere alta probabilidade de perda. Ação imediata de cobrança recomendada.`,
-  };
-
-  let html = `
-    <div class="result-hero ${p.class}">
-      <div class="result-persona-icon">${p.icon}</div>
-      <div>
-        <div class="result-persona-name">${p.label}</div>
-        <div class="result-persona-desc">${descMap[r.perfil]}</div>
-      </div>
-      <div class="result-score-ring">
-        <div class="score-ring-value" style="color:${p.colorVar}">${r.score_interno}</div>
-        <div class="score-ring-label">Score Interno</div>
-      </div>
-    </div>
-  `;
-
-  // Metrics grid
-  html += `<p class="section-label">Indicadores Calculados</p>`;
-  html += `<div class="result-metrics-grid">`;
-
-  if(r.perfil === 'potencial') {
-    html += metricCard('Juros Mensais Gerados', fmtBRL(r.receita_mensal_juros), 'Taxa 15,05% a.m. sobre dívida', GOLD);
-    html += metricCard('Receita Projetada ('+r.meses_rotativo+'m)', fmtBRL(r.receita_projetada_8m), 'Se permanecer no rotativo', GOLD);
-    html += metricCard('Comprometimento Atual', r.comprometimento_atual_pct + '%', 'da renda mensal com mínimo', r.comprometimento_atual_pct > 30 ? CRIMSON : GOLD);
-    html += metricCard('Razão Dívida/Renda', r.razao_divida_renda + '×', 'Média de risco: 1,10×', r.razao_divida_renda > 1.0 ? CRIMSON : EMERALD);
-    html += metricCard('Crédito Adicional Máx.', fmtBRL(r.credito_adicional_max), 'Respeitando 30% comprometimento', BLUE);
-    html += metricCard('Mín. Sobre Nova Oferta', fmtBRL(r.credito_adicional_max * 0.05), 'Pagamento mín. adicional (5%)', BLUE);
-  } else if(r.perfil === 'bom') {
-    html += metricCard('Razão Dívida/Renda', r.razao_divida_renda + '×', 'Confortável — baixo risco', EMERALD);
-    html += metricCard('Score Interno', r.score_interno + '/100', 'Pontuação de risco CreditIQ', EMERALD);
-    html += metricCard('Comprometimento', r.comprometimento_atual_pct + '%', 'da renda com o mínimo', EMERALD);
-    html += metricCard('Receita de Juros Gerada', fmtBRL(r.receita_mensal_juros), 'Muito baixa — sem rotativo', BLUE);
-    html += metricCard('Potencial Cross-sell', fmtBRL(r.credito_adicional_max * 1.5), 'Limite adicional sugerido', BLUE);
-    html += metricCard('Probabilidade de Ruptura', r.prob_ruptura + '%', 'Muito baixa neste perfil', EMERALD);
-  } else {
-    html += metricCard('Razão Dívida/Renda', r.razao_divida_renda + '×', 'Nível crítico de endividamento', CRIMSON);
-    html += metricCard('Score Interno', r.score_interno + '/100', 'Pontuação de risco CreditIQ', CRIMSON);
-    html += metricCard('Prob. de Ruptura', r.prob_ruptura + '%', 'Alto risco de inadimplência', CRIMSON);
-    html += metricCard('Comprometimento', r.comprometimento_atual_pct + '%', 'da renda com o mínimo', CRIMSON);
-    html += metricCard('Exposição em Dívida', fmtBRL(input.divida_pendente), 'Perda potencial', CRIMSON);
-    html += metricCard('Ação Recomendada', 'Bloqueio', 'Sem crédito adicional', CRIMSON);
+  h+=`<p class="section-label">Alertas Estratégicos</p>`;
+  if(r.perfil==='potencial'){
+    h+=ab('ruptura','🔴','Risco de Ruptura',`Se este cliente perder a fonte de renda, a dívida de <b>${fmtBRL(inp.divida_pendente)}</b> torna-se impagável. Razão D/R de <b>${r.razao_divida_renda}×</b>. Probabilidade de ruptura: <b>${r.prob_ruptura}%</b>.`);
+    h+=ab('oport','🟢','Risco de Oportunidade — Oferta de Crédito',`Este cliente suporta oferta adicional de até <b>${fmtBRL(r.credito_adicional_max)}</b> sem ultrapassar 30% de comprometimento. Pagamento mínimo incremental: <b>${fmtBRL(r.credito_adicional_max*0.05)}/mês</b>, gerando <b>${fmtBRL(r.credito_adicional_max*0.1505)}/mês</b> em juros.`);
+    h+=ab('aviso','🟡','Monitoramento Contínuo',`Cliente crônico no rotativo há ${inp.meses_rotativo} meses. Revisão trimestral recomendada. Evitar expansão de limite sem análise atualizada de renda.`);
+  }else if(r.perfil==='bom'){
+    h+=ab('info','🔵','Segurança Operacional — Baixa Lucratividade',`Cliente excelente em risco, mas gera apenas <b>${fmtBRL(r.receita_mensal_juros)}/mês</b> em juros. Estratégia ideal: cross-sell de produtos de maior margem (consórcio, seguros, investimentos).`);
+    h+=ab('oport','🟢','Oportunidade de Expansão de Limite',`Com razão D/R de <b>${r.razao_divida_renda}×</b> e histórico limpo, suporta ampliação. Limite adicional sugerido: <b>${fmtBRL(r.credito_adicional_max*1.5)}</b>.`);
+  }else{
+    h+=ab('ruptura','🔴','Risco Severo — Ação Imediata',`Score baixo com atrasos e razão D/R de <b>${r.razao_divida_renda}×</b>. Probabilidade de ruptura: <b>${r.prob_ruptura}%</b>. Bloquear novas concessões e acionar renegociação.`);
+    h+=ab('aviso','🟡','Estratégia de Recuperação',`Proposta de renegociação com desconto em juros e parcelamento do saldo. Recuperação parcial preferível à perda total de <b>${fmtBRL(inp.divida_pendente)}</b>.`);
   }
-
-  html += `</div>`;
-
-  // Barra de comprometimento
-  const compPct = Math.min(100, r.comprometimento_atual_pct);
-  const compColor = compPct > 35 ? CRIMSON : compPct > 25 ? GOLD : EMERALD;
-  html += `
-    <p class="section-label">Comprometimento de Renda</p>
-    <div class="chart-card" style="padding:18px 20px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:12px;color:rgba(10,14,26,0.55);">Comprometimento atual com pagamento mínimo</span>
-        <span style="font-size:13px;font-weight:600;color:${compColor}">${r.comprometimento_atual_pct}% da renda</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width:${compPct}%;background:${compColor};"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;">
-        <span style="font-size:10px;color:rgba(10,14,26,0.35);">0%</span>
-        <span style="font-size:10px;color:var(--emerald);">Ideal: até 25%</span>
-        <span style="font-size:10px;color:var(--gold);">Máx recomendado: 30%</span>
-        <span style="font-size:10px;color:var(--crimson);">Crítico: &gt;35%</span>
-        <span style="font-size:10px;color:rgba(10,14,26,0.35);">100%</span>
-      </div>
-    </div>
-  `;
-
-  // Alertas estratégicos
-  html += `<p class="section-label">Alertas Estratégicos</p>`;
-
-  if(r.perfil === 'potencial') {
-    html += alertBox('ruptura', '🔴', 'Risco de Ruptura',
-      `Se este cliente perder a fonte de renda, a dívida de <b>${fmtBRL(input.divida_pendente)}</b> torna-se impagável. A razão D/R de <b>${r.razao_divida_renda}×</b> significa que toda renda anual não cobre a dívida. Probabilidade estimada de ruptura: <b>${r.prob_ruptura}%</b>.`);
-    html += alertBox('oport', '🟢', 'Risco de Oportunidade — Oferta de Crédito',
-      `Este cliente suporta uma oferta adicional de até <b>${fmtBRL(r.credito_adicional_max)}</b> sem ultrapassar 30% de comprometimento de renda. O pagamento mínimo incremental seria de apenas <b>${fmtBRL(r.credito_adicional_max * 0.05)}/mês</b>, gerando <b>${fmtBRL(r.credito_adicional_max * 0.1505)}/mês</b> em receita de juros.`);
-    html += alertBox('aviso', '🟡', 'Monitoramento Contínuo Recomendado',
-      `Cliente crônico no rotativo há ${input.meses_rotativo} meses. Score baixo/médio combinado com alta razão D/R requer revisão trimestral. Evite expansão de limite sem análise atualizada de renda.`);
-  } else if(r.perfil === 'bom') {
-    html += alertBox('info', '🔵', 'Segurança Operacional — Baixa Lucratividade',
-      `Este cliente é excelente do ponto de vista de risco, mas gera apenas <b>${fmtBRL(r.receita_mensal_juros)}/mês</b> em juros — próximo de zero. A estratégia ideal é cross-sell de produtos de margem maior (consórcio, investimentos, seguros).`);
-    html += alertBox('oport', '🟢', 'Oportunidade de Expansão de Limite',
-      `Com razão D/R de <b>${r.razao_divida_renda}×</b> e histórico limpo, este cliente suporta ampliação de crédito. Limite adicional sugerido: até <b>${fmtBRL(r.credito_adicional_max * 1.5)}</b> sem comprometer a saúde financeira.`);
-  } else {
-    html += alertBox('ruptura', '🔴', 'Risco Severo — Ação Imediata',
-      `Score baixo com histórico de atrasos e razão D/R de <b>${r.razao_divida_renda}×</b>. Probabilidade de ruptura estimada em <b>${r.prob_ruptura}%</b>. Bloquear novas concessões de crédito imediatamente e acionar equipe de renegociação.`);
-    html += alertBox('aviso', '🟡', 'Estratégia de Recuperação',
-      `Considerar proposta de renegociação com desconto em juros e parcelamento do saldo devedor. A recuperação parcial é preferível à perda total de <b>${fmtBRL(input.divida_pendente)}</b>.`);
-  }
-
-  area.innerHTML = html;
+  area.innerHTML=h;
 }
 
-function metricCard(label, value, sub, color) {
-  return `
-    <div class="result-metric-card" style="border-top:3px solid ${color};">
-      <div class="rmc-label">${label}</div>
-      <div class="rmc-value" style="color:${color}">${value}</div>
-      <div class="rmc-sub">${sub}</div>
-    </div>
-  `;
-}
+function mc(l,v,s,c){return`<div class="result-metric-card" style="border-top:2px solid ${c}"><div class="rmc-label">${l}</div><div class="rmc-value" style="color:${c}">${v}</div><div class="rmc-sub">${s}</div></div>`;}
+function ab(t,i,tl,tx){return`<div class="alert-box ${t}"><div class="alert-icon">${i}</div><div><div class="alert-title">${tl}</div><div class="alert-text">${tx}</div></div></div>`;}
 
-function alertBox(type, icon, title, text) {
-  return `
-    <div class="alert-box ${type}">
-      <div class="alert-icon">${icon}</div>
-      <div>
-        <div class="alert-title">${title}</div>
-        <div class="alert-text">${text}</div>
-      </div>
-    </div>
-  `;
-}
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', loadDashboard);
+document.addEventListener('DOMContentLoaded',loadDashboard);
 </script>
 </body>
 </html>
