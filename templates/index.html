@@ -313,13 +313,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       </div>
 
       <p class="section-label">Métricas Principais</p>
-      <div class="metrics-grid">
+      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="metric-card gold">
           <span class="metric-badge badge-gold">⭐ Principal</span>
           <div class="metric-icon">🪙</div>
           <div class="metric-label">Receita — Cliente Potencial</div>
           <div class="metric-value" id="m-receita-pot">...</div>
-          <div class="metric-sub" id="m-pot-sub">58,9% da base · 98,6% da receita</div>
+          <div class="metric-sub" id="m-pot-sub">58,9% da base · 97,4% da receita</div>
         </div>
         <div class="metric-card emerald">
           <span class="metric-badge badge-emerald">✅ Estável</span>
@@ -329,18 +329,11 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
           <div class="metric-sub" id="m-bom-sub">32,5% da base · baixa lucratividade</div>
         </div>
         <div class="metric-card crimson">
-          <span class="metric-badge badge-crimson">⚠️ Perda</span>
+          <span class="metric-badge badge-crimson">⚠️ Juros</span>
           <div class="metric-icon">📉</div>
-          <div class="metric-label">Impacto — Inadimplentes</div>
+          <div class="metric-label">Receita — Inadimplentes</div>
           <div class="metric-value" id="m-receita-inad">...</div>
-          <div class="metric-sub" id="m-inad-sub">8,7% da base · risco severo de perda</div>
-        </div>
-        <div class="metric-card blue">
-          <span class="metric-badge badge-blue">📌 D/R</span>
-          <div class="metric-icon">⚖️</div>
-          <div class="metric-label">Razão Dívida/Renda Média</div>
-          <div class="metric-value">1,10×</div>
-          <div class="metric-sub" id="m-dr-sub">Zona de risco do Cliente Potencial</div>
+          <div class="metric-sub" id="m-inad-sub">8,7% da base · taxa parcelado 9,25% a.m.</div>
         </div>
       </div>
 
@@ -366,8 +359,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="charts-grid-3">
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Evolução da Razão D/R por Perfil</div><div class="chart-subtitle">Como a pressão de dívida cresce mês a mês — o Cliente Potencial deteriora progressivamente enquanto os demais se estabilizam</div></div>
-            <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Risco</span>
+            <div><div class="chart-title">Evolução da Razão D/R por Perfil</div><div class="chart-subtitle">Dados do estudo original — deterioração progressiva do Cliente Potencial: cruza o limiar de 1,0× no Mês 4 e atinge 1,15× ao final</div></div>
+            <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Estudo · Fixo</span>
           </div>
           <div id="chart-drevolucao" style="height:310px;"></div>
         </div>
@@ -380,13 +373,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
         </div>
       </div>
 
-      <p class="section-label">Distribuição da Razão Dívida/Renda</p>
+      <p class="section-label">Receita por Cliente</p>
       <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-header">
-          <div><div class="chart-title">Razão D/R na Carteira</div><div class="chart-subtitle">Concentração ao redor de 1,10× evidencia a zona crítica do Cliente Potencial</div></div>
-          <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Pressão Financeira</span>
+          <div><div class="chart-title">Receita de Juros por Cliente nos 8 Meses</div><div class="chart-subtitle">O Cliente Potencial gera 334× mais receita por cabeça do que o Bom Pagador — evidenciando o valor estratégico invisível desse segmento</div></div>
+          <span class="chart-tag" style="background:var(--gold-dim);color:var(--gold)">Receita · Estudo</span>
         </div>
-        <div id="chart-razao" style="height:230px;"></div>
+        <div id="chart-rpc" style="height:230px;"></div>
       </div>
     </div>
 
@@ -466,12 +459,20 @@ function selectAtraso(v){selectedAtrasos=v;document.getElementById('btn-atraso-s
 function fmtBRL(v){if(Math.abs(v)>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$ '+(v/1e3).toFixed(1)+'K';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 async function loadDashboard(){
-  const d=await(await fetch('/api/dashboard-data')).json(),m=d.metricas;
-  document.getElementById('big-receita-total').textContent=fmtBRL(m.receita_total);
-  document.getElementById('m-receita-pot').textContent=fmtBRL(m.receita_potencial);
-  document.getElementById('m-receita-bom').textContent=fmtBRL(m.receita_bom);
-  document.getElementById('m-receita-inad').textContent=fmtBRL(m.receita_inadimplente);
-  renderDist(d);renderEvolucao(d);renderDRevolucao(d);renderArea(d);renderRazao(d);
+  const filtros = lerFiltros();
+  const res = await fetch('/api/dashboard-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(filtros)});
+  const data = await res.json();
+  const m = data.metricas;
+
+  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_total);
+  document.getElementById('m-receita-pot').textContent  = fmtBRL(m.receita_potencial);
+  document.getElementById('m-receita-bom').textContent  = fmtBRL(m.receita_bom);
+  document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
+  document.getElementById('m-pot-sub').textContent  = `${m.pct_potencial}% da base · ${m.n_potencial.toLocaleString('pt-BR')} clientes`;
+  document.getElementById('m-bom-sub').textContent  = `${m.pct_bom}% da base · ${m.n_bom.toLocaleString('pt-BR')} clientes`;
+  document.getElementById('m-inad-sub').textContent = `${m.pct_inadimplente}% da base · ${m.n_inadimplente.toLocaleString('pt-BR')} clientes`;
+
+  renderDist(data);renderEvolucao(data);renderDRevolucao();renderArea(data);renderRPC();
 }
 
 function renderDist(d){
@@ -495,49 +496,66 @@ function renderEvolucao(d){
   ],{...PL,yaxis:{...PL.yaxis,tickprefix:'R$ ',ticksuffix:'M'},legend:{...PL.legend,orientation:'h',y:-0.22},margin:{...PL.margin,b:60}},PC);
 }
 
-function renderDRevolucao(d){
-  const dr = d.dr_evolucao;
-  Plotly.newPlot('chart-drevolucao', [
-    {
-      x:dr.meses, y:dr.inadimplente, name:'Inadimplente',
-      mode:'lines+markers',
-      line:{color:CRIMSON_L,width:2.5,shape:'spline',dash:'dot'},
-      marker:{size:6,color:CRIMSON_L,line:{color:'#0a0c10',width:1.5}},
-      hovertemplate:'<b>Inadimplente</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
-    },
-    {
-      x:dr.meses, y:dr.potencial, name:'Cliente Potencial',
-      mode:'lines+markers',
-      line:{color:GOLD,width:3,shape:'spline'},
-      marker:{size:7,color:GOLD,line:{color:'#0a0c10',width:1.5}},
-      fill:'tonexty', fillcolor:'rgba(201,168,76,0.06)',
-      hovertemplate:'<b>Cliente Potencial</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
-    },
-    {
-      x:dr.meses, y:dr.bom, name:'Bom Pagador',
-      mode:'lines+markers',
-      line:{color:EMERALD_L,width:2.5,shape:'spline'},
-      marker:{size:6,color:EMERALD_L,line:{color:'#0a0c10',width:1.5}},
-      hovertemplate:'<b>Bom Pagador</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
-    },
-  ], {
+function renderDRevolucao(){
+  // Dados fixos do estudo original — D/R real por perfil ao longo dos 8 meses
+  // Não depende da base sintética pois a dívida média calibrada é o saldo mínimo,
+  // não o saldo total que fundamenta a razão D/R do estudo
+  const meses   = ['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6','Mês 7','Mês 8'];
+  const dr_pot  = [0.85, 0.90, 0.95, 1.00, 1.05, 1.08, 1.12, 1.15];
+  const dr_bom  = [0.38, 0.35, 0.33, 0.31, 0.29, 0.28, 0.27, 0.26];
+  const dr_inad = [1.10, 1.18, 1.28, 1.38, 1.45, 1.50, 1.52, 1.55];
+
+  Plotly.newPlot('chart-drevolucao',[
+    {x:meses,y:dr_inad,name:'Inadimplente',mode:'lines+markers',
+     line:{color:CRIMSON_L,width:2.5,shape:'spline',dash:'dot'},
+     marker:{size:6,color:CRIMSON_L,line:{color:'#0a0c10',width:1.5}},
+     hovertemplate:'<b>Inadimplente</b><br>%{x}: D/R %{y:.2f}×<extra></extra>'},
+    {x:meses,y:dr_pot,name:'Cliente Potencial',mode:'lines+markers',
+     line:{color:GOLD,width:3,shape:'spline'},
+     marker:{size:7,color:GOLD,line:{color:'#0a0c10',width:1.5}},
+     fill:'tonexty',fillcolor:'rgba(201,168,76,0.06)',
+     hovertemplate:'<b>Cliente Potencial</b><br>%{x}: D/R %{y:.2f}×<extra></extra>'},
+    {x:meses,y:dr_bom,name:'Bom Pagador',mode:'lines+markers',
+     line:{color:EMERALD_L,width:2.5,shape:'spline'},
+     marker:{size:6,color:EMERALD_L,line:{color:'#0a0c10',width:1.5}},
+     hovertemplate:'<b>Bom Pagador</b><br>%{x}: D/R %{y:.2f}×<extra></extra>'},
+  ],{
     ...PL,
     yaxis:{...PL.yaxis,title:'Razão D/R Média',ticksuffix:'×',range:[0,1.8]},
-    xaxis:{...PL.xaxis},
     legend:{...PL.legend,orientation:'h',y:-0.22},
     margin:{l:56,r:16,t:16,b:65},
-    shapes:[{
-      type:'line',x0:0,x1:7,y0:1.0,y1:1.0,xref:'x',yref:'y',
-      line:{color:'rgba(201,168,76,0.4)',width:1.5,dash:'dash'},
-    }],
-    annotations:[{
-      x:'Mês 4',y:1.03,text:'1,0× — limiar de risco',showarrow:false,
-      font:{size:9,color:GOLD},xref:'x',yref:'y',
-    }],
-  }, PC);
+    shapes:[{type:'line',x0:0,x1:7,y0:1.0,y1:1.0,xref:'x',yref:'y',
+      line:{color:'rgba(201,168,76,0.4)',width:1.5,dash:'dash'}}],
+    annotations:[{x:'Mês 4',y:1.03,text:'1,0× — limiar de risco',showarrow:false,
+      font:{size:9,color:GOLD},xref:'x',yref:'y'}],
+  },PC);
 }
 
-function renderArea(d){
+function renderRPC(){
+  // Receita por cliente — valores fixos do estudo do grupo (Banco Central dez/2025)
+  const perfis = ['Cliente Potencial','Inadimplente','Bom Pagador'];
+  const vals   = [2017, 347, 6];
+  const cores  = [GOLD, CRIMSON_L, EMERALD_L];
+
+  Plotly.newPlot('chart-rpc',[{
+    x: perfis, y: vals, type:'bar',
+    marker:{color:cores, line:{width:0}},
+    text: vals.map(v=>'R$ '+v.toLocaleString('pt-BR')),
+    textposition:'outside',
+    textfont:{size:13,color:CREAM,family:'DM Sans, sans-serif'},
+    hovertemplate:'<b>%{x}</b><br>R$ %{y:,.0f} por cliente<extra></extra>',
+  }],{
+    ...PL,
+    yaxis:{...PL.yaxis,title:'R$ por cliente (8 meses)',range:[0,2500]},
+    xaxis:{...PL.xaxis},
+    margin:{l:60,r:16,t:24,b:50},
+    annotations:[
+      {x:'Cliente Potencial',y:2017,yshift:32,
+       text:'336× mais que o Bom Pagador',showarrow:false,
+       font:{size:10,color:GOLD},xref:'x',yref:'y'},
+    ],
+  },PC);
+}
   const ar = d.area;
   Plotly.newPlot('chart-area', [
     {
@@ -568,11 +586,6 @@ function renderArea(d){
     legend:{...PL.legend,orientation:'h',y:-0.22},
     margin:{l:56,r:16,t:8,b:65},
   }, PC);
-}
-
-function renderRazao(d){
-  const r=d.razao_hist,c=r.bins.map(b=>b>=1.0&&b<=1.3?GOLD:b>=1.3?CRIMSON_L:'rgba(42,80,144,0.5)');
-  Plotly.newPlot('chart-razao',[{x:r.bins.map(b=>b.toFixed(1)+'×'),y:r.counts,type:'bar',marker:{color:c,line:{width:0}},hovertemplate:'D/R: %{x}<br>Clientes: %{y:,}<extra></extra>'}],{...PL,yaxis:{...PL.yaxis,title:'Nº de Clientes'},xaxis:{...PL.xaxis,title:'Razão Dívida/Renda'},margin:{l:60,r:16,t:8,b:50},shapes:[{type:'rect',x0:'0.9×',x1:'1.3×',y0:0,y1:2100,fillcolor:'rgba(201,168,76,0.06)',line:{color:'rgba(201,168,76,0.2)',width:1}}],annotations:[{x:'1.1×',y:2060,text:'⚠ Zona Potencial (D/R 1,0–1,3×)',showarrow:false,font:{size:10,color:GOLD},xref:'x',yref:'y'}]},PC);
 }
 
 async function analisarCliente(){
