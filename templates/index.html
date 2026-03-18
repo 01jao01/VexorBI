@@ -711,18 +711,15 @@ async function loadDashboard(){
   document.getElementById('m-receita-pot').textContent  = fmtBRL(m.receita_potencial);
   document.getElementById('m-receita-bom').textContent  = fmtBRL(m.receita_bom);
   document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
-
-  // Atualiza sub-labels com % reais dos filtrados
   document.getElementById('m-pot-sub').textContent  = `${m.pct_potencial}% da base · ${m.n_potencial.toLocaleString('pt-BR')} clientes`;
   document.getElementById('m-bom-sub').textContent  = `${m.pct_bom}% da base · ${m.n_bom.toLocaleString('pt-BR')} clientes`;
   document.getElementById('m-inad-sub').textContent = `${m.pct_inadimplente}% da base · ${m.n_inadimplente.toLocaleString('pt-BR')} clientes`;
-  document.getElementById('m-dr-sub').textContent   = `D/R médio Potencial: ${m.dr_medio_potencial}×`;
 
   renderDist(data);
   renderEvolucao(data);
-  renderDRevolucao(data);
+  renderDRevolucao();
   renderArea(data);
-  renderRazao(data);
+  renderRPC();
 }
 
 document.addEventListener('DOMContentLoaded',loadDashboard);
