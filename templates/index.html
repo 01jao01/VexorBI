@@ -319,28 +319,28 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
           <div class="metric-icon">🪙</div>
           <div class="metric-label">Receita — Cliente Potencial</div>
           <div class="metric-value" id="m-receita-pot">...</div>
-          <div class="metric-sub">58,9% da base · 98,6% da receita</div>
+          <div class="metric-sub" id="m-pot-sub">58,9% da base · 98,6% da receita</div>
         </div>
         <div class="metric-card emerald">
           <span class="metric-badge badge-emerald">✅ Estável</span>
           <div class="metric-icon">🛡️</div>
           <div class="metric-label">Receita — Bom Pagador</div>
           <div class="metric-value" id="m-receita-bom">...</div>
-          <div class="metric-sub">32,5% da base · baixa lucratividade</div>
+          <div class="metric-sub" id="m-bom-sub">32,5% da base · baixa lucratividade</div>
         </div>
         <div class="metric-card crimson">
           <span class="metric-badge badge-crimson">⚠️ Perda</span>
           <div class="metric-icon">📉</div>
           <div class="metric-label">Impacto — Inadimplentes</div>
           <div class="metric-value" id="m-receita-inad">...</div>
-          <div class="metric-sub">8,7% da base · risco severo de perda</div>
+          <div class="metric-sub" id="m-inad-sub">8,7% da base · risco severo de perda</div>
         </div>
         <div class="metric-card blue">
           <span class="metric-badge badge-blue">📌 D/R</span>
           <div class="metric-icon">⚖️</div>
           <div class="metric-label">Razão Dívida/Renda Média</div>
           <div class="metric-value">1,10×</div>
-          <div class="metric-sub">Zona de risco do Cliente Potencial</div>
+          <div class="metric-sub" id="m-dr-sub">Zona de risco do Cliente Potencial</div>
         </div>
       </div>
 
@@ -504,123 +504,77 @@ function renderEvolucao(d){
 }
 
 function renderDRevolucao(d){
-  const meses = ['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6','Mês 7','Mês 8'];
-
-  // Razão D/R média por perfil ao longo dos 8 meses
-  // Cliente Potencial: começa pressionado e deteriora — dívida cresce, renda estagna
-  // Inadimplente: já começa alto e estoura — sai da carteira ativa por calote
-  // Bom Pagador: estável e baixo — amortiza a dívida mês a mês
-  const dr_pot  = [0.85, 0.90, 0.95, 1.00, 1.05, 1.08, 1.12, 1.15];
-  const dr_bom  = [0.38, 0.35, 0.33, 0.31, 0.29, 0.28, 0.27, 0.26];
-  const dr_inad = [1.10, 1.18, 1.28, 1.38, 1.45, 1.50, 1.52, 1.55];
-
+  const dr = d.dr_evolucao;
   Plotly.newPlot('chart-drevolucao', [
     {
-      x: meses, y: dr_inad, name: 'Inadimplente',
-      mode: 'lines+markers',
-      line: { color: CRIMSON_L, width: 2.5, shape: 'spline', dash: 'dot' },
-      marker: { size: 6, color: CRIMSON_L, line: { color: '#0a0c10', width: 1.5 } },
-      hovertemplate: '<b>Inadimplente</b><br>%{x}: D/R %{y}×<extra></extra>',
+      x:dr.meses, y:dr.inadimplente, name:'Inadimplente',
+      mode:'lines+markers',
+      line:{color:CRIMSON_L,width:2.5,shape:'spline',dash:'dot'},
+      marker:{size:6,color:CRIMSON_L,line:{color:'#0a0c10',width:1.5}},
+      hovertemplate:'<b>Inadimplente</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
     },
     {
-      x: meses, y: dr_pot, name: 'Cliente Potencial',
-      mode: 'lines+markers',
-      line: { color: GOLD, width: 3, shape: 'spline' },
-      marker: { size: 7, color: GOLD, line: { color: '#0a0c10', width: 1.5 } },
-      fill: 'tonexty',
-      fillcolor: 'rgba(201,168,76,0.06)',
-      hovertemplate: '<b>Cliente Potencial</b><br>%{x}: D/R %{y}×<extra></extra>',
+      x:dr.meses, y:dr.potencial, name:'Cliente Potencial',
+      mode:'lines+markers',
+      line:{color:GOLD,width:3,shape:'spline'},
+      marker:{size:7,color:GOLD,line:{color:'#0a0c10',width:1.5}},
+      fill:'tonexty', fillcolor:'rgba(201,168,76,0.06)',
+      hovertemplate:'<b>Cliente Potencial</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
     },
     {
-      x: meses, y: dr_bom, name: 'Bom Pagador',
-      mode: 'lines+markers',
-      line: { color: EMERALD_L, width: 2.5, shape: 'spline' },
-      marker: { size: 6, color: EMERALD_L, line: { color: '#0a0c10', width: 1.5 } },
-      hovertemplate: '<b>Bom Pagador</b><br>%{x}: D/R %{y}×<extra></extra>',
+      x:dr.meses, y:dr.bom, name:'Bom Pagador',
+      mode:'lines+markers',
+      line:{color:EMERALD_L,width:2.5,shape:'spline'},
+      marker:{size:6,color:EMERALD_L,line:{color:'#0a0c10',width:1.5}},
+      hovertemplate:'<b>Bom Pagador</b><br>%{x}: D/R %{y:.2f}×<extra></extra>',
     },
   ], {
     ...PL,
-    yaxis: { ...PL.yaxis, title: 'Razão D/R Média', ticksuffix: '×', range: [0, 1.75] },
-    xaxis: { ...PL.xaxis },
-    legend: { ...PL.legend, orientation: 'h', y: -0.22 },
-    margin: { l: 56, r: 16, t: 16, b: 65 },
-    shapes: [
-      // Linha de risco 1.0x
-      {
-        type: 'line', x0: 0, x1: 7, y0: 1.0, y1: 1.0,
-        xref: 'x', yref: 'y',
-        line: { color: 'rgba(201,168,76,0.4)', width: 1.5, dash: 'dash' },
-      },
-    ],
-    annotations: [
-      {
-        x: 'Mês 4', y: 1.03,
-        text: '1,0× — limiar de risco', showarrow: false,
-        font: { size: 9, color: GOLD }, xref: 'x', yref: 'y',
-      },
-      {
-        x: 'Mês 8', y: 1.18,
-        text: '1,15×', showarrow: false,
-        font: { size: 10, color: GOLD, family: 'DM Sans, sans-serif' },
-        xref: 'x', yref: 'y', xanchor: 'left', xshift: 6,
-      },
-    ],
+    yaxis:{...PL.yaxis,title:'Razão D/R Média',ticksuffix:'×',range:[0,1.8]},
+    xaxis:{...PL.xaxis},
+    legend:{...PL.legend,orientation:'h',y:-0.22},
+    margin:{l:56,r:16,t:16,b:65},
+    shapes:[{
+      type:'line',x0:0,x1:7,y0:1.0,y1:1.0,xref:'x',yref:'y',
+      line:{color:'rgba(201,168,76,0.4)',width:1.5,dash:'dash'},
+    }],
+    annotations:[{
+      x:'Mês 4',y:1.03,text:'1,0× — limiar de risco',showarrow:false,
+      font:{size:9,color:GOLD},xref:'x',yref:'y',
+    }],
   }, PC);
 }
 
 function renderArea(d){
-  const meses = ['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6','Mês 7','Mês 8'];
-
-  // Composição % da carteira ativa por mês
-  // Bons pagadores saem cedo (quitam ou não renovam)
-  // Inadimplentes saem por calote
-  // Potenciais ficam — "retenção involuntária"
-  const pot  = [42, 47, 52, 56, 60, 64, 68, 72];
-  const bom  = [46, 41, 36, 32, 28, 25, 22, 20];
-  const inad = [12, 12, 12, 12, 12, 11, 10,  8];
-
+  const ar = d.area;
   Plotly.newPlot('chart-area', [
     {
-      x: meses, y: inad, name: 'Inadimplente',
-      type: 'scatter', mode: 'none',
-      fill: 'tozeroy', fillcolor: 'rgba(196,68,68,0.55)',
-      stackgroup: 'one',
-      hovertemplate: '<b>Inadimplente</b><br>%{x}: %{y}%<extra></extra>',
+      x:ar.meses, y:ar.inadimplente, name:'Inadimplente',
+      type:'scatter', mode:'none',
+      fill:'tozeroy', fillcolor:'rgba(196,68,68,0.55)',
+      stackgroup:'one',
+      hovertemplate:'<b>Inadimplente</b><br>%{x}: %{y:.1f}%<extra></extra>',
     },
     {
-      x: meses, y: bom, name: 'Bom Pagador',
-      type: 'scatter', mode: 'none',
-      fill: 'tonexty', fillcolor: 'rgba(53,160,122,0.55)',
-      stackgroup: 'one',
-      hovertemplate: '<b>Bom Pagador</b><br>%{x}: %{y}%<extra></extra>',
+      x:ar.meses, y:ar.bom, name:'Bom Pagador',
+      type:'scatter', mode:'none',
+      fill:'tonexty', fillcolor:'rgba(53,160,122,0.55)',
+      stackgroup:'one',
+      hovertemplate:'<b>Bom Pagador</b><br>%{x}: %{y:.1f}%<extra></extra>',
     },
     {
-      x: meses, y: pot, name: 'Cliente Potencial',
-      type: 'scatter', mode: 'none',
-      fill: 'tonexty', fillcolor: 'rgba(201,168,76,0.75)',
-      stackgroup: 'one',
-      hovertemplate: '<b>Cliente Potencial</b><br>%{x}: %{y}%<extra></extra>',
+      x:ar.meses, y:ar.potencial, name:'Cliente Potencial',
+      type:'scatter', mode:'none',
+      fill:'tonexty', fillcolor:'rgba(201,168,76,0.75)',
+      stackgroup:'one',
+      hovertemplate:'<b>Cliente Potencial</b><br>%{x}: %{y:.1f}%<extra></extra>',
     },
   ], {
     ...PL,
-    yaxis: { ...PL.yaxis, ticksuffix: '%', range: [0, 100], title: '% da Carteira Ativa' },
-    xaxis: { ...PL.xaxis },
-    legend: { ...PL.legend, orientation: 'h', y: -0.22 },
-    margin: { l: 56, r: 16, t: 8, b: 65 },
-    annotations: [
-      {
-        x: 'Mês 8', y: 36,
-        text: '72% Potencial', showarrow: false,
-        font: { size: 11, color: '#0a0c10', family: 'DM Sans, sans-serif' },
-        xref: 'x', yref: 'y', xanchor: 'right',
-      },
-      {
-        x: 'Mês 1', y: 71,
-        text: '42%', showarrow: false,
-        font: { size: 10, color: '#0a0c10', family: 'DM Sans, sans-serif' },
-        xref: 'x', yref: 'y',
-      },
-    ],
+    yaxis:{...PL.yaxis,ticksuffix:'%',range:[0,100],title:'% da Carteira Ativa'},
+    xaxis:{...PL.xaxis},
+    legend:{...PL.legend,orientation:'h',y:-0.22},
+    margin:{l:56,r:16,t:8,b:65},
   }, PC);
 }
 
@@ -690,47 +644,37 @@ function renderResultado(r,inp){
 function mc(l,v,s,c){return`<div class="result-metric-card" style="border-top:2px solid ${c}"><div class="rmc-label">${l}</div><div class="rmc-value" style="color:${c}">${v}</div><div class="rmc-sub">${s}</div></div>`;}
 function ab(t,i,tl,tx){return`<div class="alert-box ${t}"><div class="alert-icon">${i}</div><div><div class="alert-title">${tl}</div><div class="alert-text">${tx}</div></div></div>`;}
 
+// ─── FILTROS ───
 function updateFilterRange(field){
   const min = document.getElementById(`f-${field}-min`);
   const max = document.getElementById(`f-${field}-max`);
   let vMin = parseInt(min.value), vMax = parseInt(max.value);
-  if(vMin > vMax){ if(event.target === min) min.value = vMax; else max.value = vMin; vMin = parseInt(min.value); vMax = parseInt(max.value); }
+  if(vMin > vMax){ if(event.target===min) min.value=vMax; else max.value=vMin; vMin=parseInt(min.value); vMax=parseInt(max.value); }
   if(field==='meses'){
-    document.getElementById('f-meses-min-val').textContent = vMin + (vMin===1?' mês':' meses');
-    document.getElementById('f-meses-max-val').textContent = vMax + ' meses';
+    document.getElementById('f-meses-min-val').textContent = vMin+(vMin===1?' mês':' meses');
+    document.getElementById('f-meses-max-val').textContent = vMax+' meses';
   } else {
-    document.getElementById('f-idade-min-val').textContent = vMin + ' anos';
-    document.getElementById('f-idade-max-val').textContent = vMax + ' anos';
+    document.getElementById('f-idade-min-val').textContent = vMin+' anos';
+    document.getElementById('f-idade-max-val').textContent = vMax+' anos';
   }
 }
 
-function aplicarFiltros(){
-  const potAtivo  = document.getElementById('f-potencial').checked;
-  const bomAtivo  = document.getElementById('f-bom').checked;
-  const inadAtivo = document.getElementById('f-inad').checked;
-  const renda     = document.getElementById('f-renda').value;
-  const mesesMin  = parseInt(document.getElementById('f-meses-min').value);
-  const mesesMax  = parseInt(document.getElementById('f-meses-max').value);
-  const idadeMin  = parseInt(document.getElementById('f-idade-min').value);
-  const idadeMax  = parseInt(document.getElementById('f-idade-max').value);
-
-  // Aplica visibilidade nos traces do gráfico de evolução de receita
-  const visEvolucao = [potAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly', inadAtivo ? true : 'legendonly'];
-  Plotly.restyle('chart-evolucao', { visible: visEvolucao });
-
-  // Aplica nos traces do gráfico de D/R evolução (ordem: inad, pot, bom)
-  const visDR = [inadAtivo ? true : 'legendonly', potAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly'];
-  Plotly.restyle('chart-drevolucao', { visible: visDR });
-
-  // Aplica nos traces do gráfico de área (ordem: inad, bom, pot)
-  const visArea = [inadAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly', potAtivo ? true : 'legendonly'];
-  Plotly.restyle('chart-area', { visible: visArea });
-
-  // Feedback visual nos cards de métrica
-  document.querySelector('.metric-card.gold').style.opacity    = potAtivo  ? '1' : '0.3';
-  document.querySelector('.metric-card.emerald').style.opacity = bomAtivo  ? '1' : '0.3';
-  document.querySelector('.metric-card.crimson').style.opacity = inadAtivo ? '1' : '0.3';
+function lerFiltros(){
+  const perfis = [];
+  if(document.getElementById('f-potencial').checked) perfis.push('potencial');
+  if(document.getElementById('f-bom').checked)       perfis.push('bom');
+  if(document.getElementById('f-inad').checked)      perfis.push('inadimplente');
+  return {
+    perfis,
+    renda:     document.getElementById('f-renda').value,
+    meses_min: parseInt(document.getElementById('f-meses-min').value),
+    meses_max: parseInt(document.getElementById('f-meses-max').value),
+    idade_min: parseInt(document.getElementById('f-idade-min').value),
+    idade_max: parseInt(document.getElementById('f-idade-max').value),
+  };
 }
+
+function aplicarFiltros(){ loadDashboard(); }
 
 function resetFiltros(){
   document.getElementById('f-potencial').checked = true;
@@ -743,7 +687,36 @@ function resetFiltros(){
   document.getElementById('f-idade-max').value   = '80';
   updateFilterRange('meses');
   updateFilterRange('idade');
-  aplicarFiltros();
+  loadDashboard();
+}
+
+// ─── LOAD DASHBOARD ───
+async function loadDashboard(){
+  const filtros = lerFiltros();
+  const res  = await fetch('/api/dashboard-data', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(filtros),
+  });
+  const data = await res.json();
+  const m    = data.metricas;
+
+  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_total);
+  document.getElementById('m-receita-pot').textContent  = fmtBRL(m.receita_potencial);
+  document.getElementById('m-receita-bom').textContent  = fmtBRL(m.receita_bom);
+  document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
+
+  // Atualiza sub-labels com % reais dos filtrados
+  document.getElementById('m-pot-sub').textContent  = `${m.pct_potencial}% da base · ${m.n_potencial.toLocaleString('pt-BR')} clientes`;
+  document.getElementById('m-bom-sub').textContent  = `${m.pct_bom}% da base · ${m.n_bom.toLocaleString('pt-BR')} clientes`;
+  document.getElementById('m-inad-sub').textContent = `${m.pct_inadimplente}% da base · ${m.n_inadimplente.toLocaleString('pt-BR')} clientes`;
+  document.getElementById('m-dr-sub').textContent   = `D/R médio Potencial: ${m.dr_medio_potencial}×`;
+
+  renderDist(data);
+  renderEvolucao(data);
+  renderDRevolucao(data);
+  renderArea(data);
+  renderRazao(data);
 }
 
 document.addEventListener('DOMContentLoaded',loadDashboard);
