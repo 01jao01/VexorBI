@@ -249,58 +249,83 @@ def _calcular_area(sub):
 # MOTOR DE CLASSIFICAÇÃO INDIVIDUAL
 # ─────────────────────────────────────────────
 
-def classificar_cliente(idade, salario_mensal, score, atrasos, divida_pendente, meses_rotativo):
+def classificar_cliente(idade, salario_mensal, atrasos, divida_pendente, meses_rotativo):
+    """
+    Classifica o cliente em uma das 3 personas com base em:
+    - Razão Dívida/Renda (principal driver)
+    - Comprometimento de renda com o pagamento mínimo
+    - Cronicidade no rotativo (meses)
+    - Histórico de atrasos
+    - Idade (fator de estabilidade)
+
+    Score interno (0–100) mede pressão financeira: quanto maior, maior o risco.
+    """
     salario_anual      = salario_mensal * 12
-    razao_divida_renda = divida_pendente / salario_anual if salario_anual > 0 else 0
+    razao_dr           = divida_pendente / salario_anual if salario_anual > 0 else 0
+    pagamento_minimo   = divida_pendente * 0.05          # 5% da dívida = mínimo típico
+    comprometimento    = pagamento_minimo / salario_mensal if salario_mensal > 0 else 0
 
-    if not atrasos and score == "Ótimo":
+    # ── Score interno de pressão financeira (0 = saudável, 100 = crítico) ──
+    # Cada componente contribui com um peso proporcional à sua relevância real
+    s_dr           = min(40, razao_dr * 36)          # até 40 pts — driver principal
+    s_comprom      = min(25, comprometimento * 80)   # até 25 pts — quanto da renda vai pro mínimo
+    s_meses        = min(20, (meses_rotativo - 1) * 2.9)  # até 20 pts — cronicidade
+    s_atraso       = 12 if atrasos else 0             # 12 pts fixos se tem atraso
+    s_idade        = max(0, (25 - max(0, idade - 30)) * 0.15)  # bônus leve para maturidade
+    score_interno  = max(0, min(100, round(s_dr + s_comprom + s_meses + s_atraso - s_idade)))
+
+    # ── Classificação por regras financeiras objetivas ──
+    # Inadimplente: tem atraso E está muito endividado
+    if atrasos and razao_dr > 1.20:
+        perfil = "inadimplente"
+    elif atrasos and comprometimento > 0.50:
+        perfil = "inadimplente"
+
+    # Bom Pagador: baixo endividamento, sem atraso, comprometimento confortável
+    elif not atrasos and razao_dr < 0.55 and comprometimento < 0.20:
         perfil = "bom"
-    elif atrasos and score == "Baixo":
-        perfil = "inadimplente"
-    elif atrasos and razao_divida_renda > 1.3:
-        perfil = "inadimplente"
-    elif score in ("Bom", "Baixo") and razao_divida_renda >= 0.7 and not (atrasos and score == "Baixo"):
+    elif not atrasos and razao_dr < 0.40:
+        perfil = "bom"
+
+    # Cliente Potencial: endividamento médio-alto, pode ou não ter atraso pontual
+    elif razao_dr >= 0.75 and not (atrasos and razao_dr > 1.20):
         perfil = "potencial"
-    elif not atrasos and score == "Bom" and razao_divida_renda < 0.7:
-        perfil = "bom"
+
+    # Zona cinza: decide pelo comprometimento
+    elif comprometimento >= 0.25 and not atrasos:
+        perfil = "potencial"
     else:
-        perfil = "potencial" if razao_divida_renda >= 0.9 and not (atrasos and score == "Baixo") else "bom"
+        perfil = "bom"
 
-    receita_mensal_juros  = divida_pendente * TAXA_JUROS_MENSAL
-    receita_projetada_8m  = receita_mensal_juros * min(meses_rotativo, 8)
-    pagamento_minimo_atual = divida_pendente * 0.05
-    comprometimento_atual  = pagamento_minimo_atual / salario_mensal if salario_mensal > 0 else 0
-    margem_disponivel      = (salario_mensal * 0.30) - pagamento_minimo_atual
-    credito_adicional_max  = max(0, (margem_disponivel / 0.05) if margem_disponivel > 0 else 0)
+    # ── Cálculos financeiros ──
+    receita_mensal_juros = divida_pendente * TAXA_JUROS_MENSAL
+    receita_projetada    = receita_mensal_juros * min(meses_rotativo, 8)
 
-    score_map    = {"Baixo": 30, "Bom": 60, "Ótimo": 90}
-    score_interno = max(0, min(100,
-        score_map.get(score, 50)
-        - (20 if atrasos else 0)
-        - min(25, razao_divida_renda * 15)
-        + (5 if 30 <= idade <= 55 else 0)
-    ))
+    margem_disponivel    = (salario_mensal * 0.30) - pagamento_minimo
+    credito_adicional    = max(0, (margem_disponivel / 0.05) if margem_disponivel > 0 else 0)
 
-    prob_ruptura = min(95, int(
-        razao_divida_renda * 60
-        + (20 if atrasos else 0)
-        + (10 if score == "Baixo" else 0)
-        + (15 if salario_mensal < 3000 else 0)
-    ))
+    # Probabilidade de ruptura: derivada diretamente das métricas financeiras
+    prob_ruptura = min(95, max(5, round(
+        razao_dr * 45
+        + comprometimento * 30
+        + (18 if atrasos else 0)
+        + max(0, (meses_rotativo - 4) * 2)
+        - max(0, (idade - 30) * 0.3)
+    )))
 
     return {
-        "perfil":                  perfil,
-        "razao_divida_renda":      round(razao_divida_renda, 2),
-        "receita_mensal_juros":    round(receita_mensal_juros, 2),
-        "receita_projetada_8m":    round(receita_projetada_8m, 2),
-        "comprometimento_atual_pct": round(comprometimento_atual * 100, 1),
-        "credito_adicional_max":   round(credito_adicional_max, 2),
-        "score_interno":           score_interno,
-        "prob_ruptura":            prob_ruptura,
-        "pagamento_minimo_atual":  round(pagamento_minimo_atual, 2),
-        "salario_anual":           salario_anual,
-        "divida_pendente":         divida_pendente,
-        "meses_rotativo":          meses_rotativo,
+        "perfil":                    perfil,
+        "razao_divida_renda":        round(razao_dr, 2),
+        "comprometimento_atual_pct": round(comprometimento * 100, 1),
+        "receita_mensal_juros":      round(receita_mensal_juros, 2),
+        "receita_projetada_8m":      round(receita_projetada, 2),
+        "credito_adicional_max":     round(credito_adicional, 2),
+        "score_interno":             score_interno,
+        "prob_ruptura":              prob_ruptura,
+        "pagamento_minimo_atual":    round(pagamento_minimo, 2),
+        "salario_anual":             salario_anual,
+        "divida_pendente":           divida_pendente,
+        "meses_rotativo":            meses_rotativo,
     }
 
 # ─────────────────────────────────────────────
@@ -343,7 +368,6 @@ def analisar_cliente():
     return jsonify(classificar_cliente(
         idade          = int(data.get("idade", 35)),
         salario_mensal = float(data.get("salario_mensal", 5000)),
-        score          = data.get("score", "Bom"),
         atrasos        = bool(data.get("atrasos", False)),
         divida_pendente= float(data.get("divida_pendente", 10000)),
         meses_rotativo = int(data.get("meses_rotativo", 6)),
