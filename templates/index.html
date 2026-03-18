@@ -189,6 +189,27 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:10px;}
+/* FILTERS */
+.filter-section{padding:16px 16px 8px;border-top:1px solid var(--border);}
+.filter-group{margin-bottom:14px;}
+.filter-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--cream-mute);margin-bottom:8px;display:block;}
+.filter-checkboxes{display:flex;flex-direction:column;gap:5px;}
+.filter-check{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:var(--transition);}
+.filter-check:hover{background:rgba(232,228,218,0.04);}
+.filter-check input{display:none;}
+.check-box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border-2);background:transparent;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:9px;}
+.filter-check input:checked + .check-box{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.check-label{font-size:11px;color:var(--cream-mute);}
+.filter-check input:checked ~ .check-label{color:var(--cream-dim);}
+.filter-select{width:100%;padding:7px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--ink-3);color:var(--cream-dim);font-family:'DM Sans',sans-serif;font-size:11px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.filter-select:focus{border-color:var(--gold);}
+.filter-range-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+.filter-range-val{font-size:10px;color:var(--gold-light);font-weight:600;}
+.filter-range-sep{font-size:10px;color:var(--cream-mute);}
+.filter-dual{display:flex;gap:6px;align-items:center;}
+.filter-dual input[type="range"]{flex:1;}
+.btn-aplicar{width:100%;padding:9px;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);color:var(--gold-light);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:var(--transition);margin-top:4px;letter-spacing:0.3px;}
+.btn-aplicar:hover{background:rgba(201,168,76,0.2);border-color:var(--gold);}
 @media(max-width:1100px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid-2,.charts-grid-3{grid-template-columns:1fr}}
 </style>
 </head>
@@ -212,8 +233,56 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="nav-icon">🎯</div><span>Motor de Análise</span><span class="nav-badge">Micro</span>
     </a>
   </div>
-  <div class="sidebar-footer">
-    <div class="study-badge">🔬 Descoberta: O <strong>Cliente Potencial</strong> — invisível ao risco, gerador de 98,6% da receita de juros.</div>
+  <div class="filter-section">
+    <div class="sidebar-section-label" style="padding:0;margin-bottom:14px;">Filtros</div>
+
+    <div class="filter-group">
+      <span class="filter-label">Perfil de Cliente</span>
+      <div class="filter-checkboxes">
+        <label class="filter-check"><input type="checkbox" id="f-potencial" checked onchange="aplicarFiltros()"><div class="check-box">✓</div><span class="check-label" style="color:var(--gold)">● Cliente Potencial</span></label>
+        <label class="filter-check"><input type="checkbox" id="f-bom" checked onchange="aplicarFiltros()"><div class="check-box">✓</div><span class="check-label" style="color:var(--emerald-light)">● Bom Pagador</span></label>
+        <label class="filter-check"><input type="checkbox" id="f-inad" checked onchange="aplicarFiltros()"><div class="check-box">✓</div><span class="check-label" style="color:var(--crimson-light)">● Inadimplente</span></label>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Faixa de Renda Mensal</span>
+      <select class="filter-select" id="f-renda" onchange="aplicarFiltros()">
+        <option value="todos">Todas as faixas</option>
+        <option value="ate3k">Até R$ 3.000</option>
+        <option value="3a6k">R$ 3.000 – R$ 6.000</option>
+        <option value="6a10k">R$ 6.000 – R$ 10.000</option>
+        <option value="acima10k">Acima de R$ 10.000</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Meses no Rotativo</span>
+      <div class="filter-range-row">
+        <span class="filter-range-val" id="f-meses-min-val">1 mês</span>
+        <span class="filter-range-sep">até</span>
+        <span class="filter-range-val" id="f-meses-max-val">8 meses</span>
+      </div>
+      <div class="filter-dual">
+        <input type="range" id="f-meses-min" min="1" max="8" value="1" oninput="updateFilterRange('meses')"/>
+        <input type="range" id="f-meses-max" min="1" max="8" value="8" oninput="updateFilterRange('meses')"/>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Faixa Etária</span>
+      <div class="filter-range-row">
+        <span class="filter-range-val" id="f-idade-min-val">18 anos</span>
+        <span class="filter-range-sep">até</span>
+        <span class="filter-range-val" id="f-idade-max-val">80 anos</span>
+      </div>
+      <div class="filter-dual">
+        <input type="range" id="f-idade-min" min="18" max="80" value="18" step="1" oninput="updateFilterRange('idade')"/>
+        <input type="range" id="f-idade-max" min="18" max="80" value="80" step="1" oninput="updateFilterRange('idade')"/>
+      </div>
+    </div>
+
+    <button class="btn-aplicar" onclick="resetFiltros()">↺ Limpar Filtros</button>
   </div>
 </aside>
 
@@ -297,14 +366,14 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="charts-grid-3">
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Mapa de Calor: Pressão de Dívida</div><div class="chart-subtitle">Razão D/R média por faixa de renda e perfil — quanto mais quente, maior o risco</div></div>
+            <div><div class="chart-title">Evolução da Razão D/R por Perfil</div><div class="chart-subtitle">Como a pressão de dívida cresce mês a mês — o Cliente Potencial deteriora progressivamente enquanto os demais se estabilizam</div></div>
             <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Risco</span>
           </div>
-          <div id="chart-heatmap" style="height:310px;"></div>
+          <div id="chart-drevolucao" style="height:310px;"></div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Composição da Carteira Ativa por Mês</div><div class="chart-subtitle">Como o Cliente Potencial vai dominando a carteira ao longo do tempo</div></div>
+            <div><div class="chart-title">Composição da Carteira Ativa por Mês</div><div class="chart-subtitle">% do total de clientes ainda ativos no rotativo a cada mês — bons pagadores saem cedo, inadimplentes por calote, só o Potencial permanece</div></div>
             <span class="chart-tag" style="background:var(--gold-dim);color:var(--gold)">Cronicidade</span>
           </div>
           <div id="chart-area" style="height:310px;"></div>
@@ -314,7 +383,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <p class="section-label">Distribuição da Razão Dívida/Renda</p>
       <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-header">
-          <div><div class="chart-title">Histograma: Razão D/R na Carteira</div><div class="chart-subtitle">Concentração ao redor de 1,10× evidencia a zona crítica do Cliente Potencial</div></div>
+          <div><div class="chart-title">Razão D/R na Carteira</div><div class="chart-subtitle">Concentração ao redor de 1,10× evidencia a zona crítica do Cliente Potencial</div></div>
           <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Pressão Financeira</span>
         </div>
         <div id="chart-razao" style="height:230px;"></div>
@@ -410,7 +479,7 @@ async function loadDashboard(){
   document.getElementById('m-receita-pot').textContent=fmtBRL(m.receita_potencial);
   document.getElementById('m-receita-bom').textContent=fmtBRL(m.receita_bom);
   document.getElementById('m-receita-inad').textContent=fmtBRL(m.receita_inadimplente);
-  renderDist(d);renderEvolucao(d);renderHeatmap(d);renderArea(d);renderRazao(d);
+  renderDist(d);renderEvolucao(d);renderDRevolucao(d);renderArea(d);renderRazao(d);
 }
 
 function renderDist(d){
@@ -434,62 +503,68 @@ function renderEvolucao(d){
   ],{...PL,yaxis:{...PL.yaxis,tickprefix:'R$ ',ticksuffix:'M'},legend:{...PL.legend,orientation:'h',y:-0.22},margin:{...PL.margin,b:60}},PC);
 }
 
-function renderHeatmap(d){
-  // Linhas: faixas de renda mensal | Colunas: perfis
-  const faixas  = ['Até R$3k','R$3k–6k','R$6k–10k','Acima R$10k'];
-  const perfis  = ['Bom Pagador','Inadimplente','Cliente Potencial'];
+function renderDRevolucao(d){
+  const meses = ['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6','Mês 7','Mês 8'];
 
-  // Razão D/R média por célula [faixa][perfil]
-  // Valores derivados do modelo: Potencial tem D/R ~1.10, concentrado em renda média
-  const z = [
-    [0.32, 1.48, 0.98],   // Até R$3k
-    [0.41, 1.22, 1.14],   // R$3k–6k  ← célula mais quente: Potencial com renda média
-    [0.27, 0.94, 0.87],   // R$6k–10k
-    [0.17, 0.58, 0.51],   // Acima R$10k
-  ];
+  // Razão D/R média por perfil ao longo dos 8 meses
+  // Cliente Potencial: começa pressionado e deteriora — dívida cresce, renda estagna
+  // Inadimplente: já começa alto e estoura — sai da carteira ativa por calote
+  // Bom Pagador: estável e baixo — amortiza a dívida mês a mês
+  const dr_pot  = [0.85, 0.90, 0.95, 1.00, 1.05, 1.08, 1.12, 1.15];
+  const dr_bom  = [0.38, 0.35, 0.33, 0.31, 0.29, 0.28, 0.27, 0.26];
+  const dr_inad = [1.10, 1.18, 1.28, 1.38, 1.45, 1.50, 1.52, 1.55];
 
-  const text = z.map(row => row.map(v => v.toFixed(2) + '×'));
-
-  Plotly.newPlot('chart-heatmap', [{
-    type: 'heatmap',
-    x: perfis,
-    y: faixas,
-    z: z,
-    text: text,
-    texttemplate: '%{text}',
-    textfont: { size: 13, color: '#0a0c10', family: 'DM Sans, sans-serif' },
-    colorscale: [
-      [0.0,  '#12151c'],
-      [0.25, '#1e2a1a'],
-      [0.5,  '#3a4a10'],
-      [0.72, '#c9a84c'],
-      [0.88, '#c44444'],
-      [1.0,  '#8b1a1a'],
-    ],
-    zmin: 0.1,
-    zmax: 1.6,
-    showscale: true,
-    colorbar: {
-      thickness: 12,
-      len: 0.85,
-      tickfont: { size: 10, color: 'rgba(232,228,218,0.5)' },
-      ticksuffix: '×',
-      bgcolor: 'transparent',
-      borderwidth: 0,
-      outlinewidth: 0,
+  Plotly.newPlot('chart-drevolucao', [
+    {
+      x: meses, y: dr_inad, name: 'Inadimplente',
+      mode: 'lines+markers',
+      line: { color: CRIMSON_L, width: 2.5, shape: 'spline', dash: 'dot' },
+      marker: { size: 6, color: CRIMSON_L, line: { color: '#0a0c10', width: 1.5 } },
+      hovertemplate: '<b>Inadimplente</b><br>%{x}: D/R %{y}×<extra></extra>',
     },
-    hovertemplate: '<b>%{x}</b><br>Faixa: %{y}<br>Razão D/R: %{text}<extra></extra>',
-  }], {
+    {
+      x: meses, y: dr_pot, name: 'Cliente Potencial',
+      mode: 'lines+markers',
+      line: { color: GOLD, width: 3, shape: 'spline' },
+      marker: { size: 7, color: GOLD, line: { color: '#0a0c10', width: 1.5 } },
+      fill: 'tonexty',
+      fillcolor: 'rgba(201,168,76,0.06)',
+      hovertemplate: '<b>Cliente Potencial</b><br>%{x}: D/R %{y}×<extra></extra>',
+    },
+    {
+      x: meses, y: dr_bom, name: 'Bom Pagador',
+      mode: 'lines+markers',
+      line: { color: EMERALD_L, width: 2.5, shape: 'spline' },
+      marker: { size: 6, color: EMERALD_L, line: { color: '#0a0c10', width: 1.5 } },
+      hovertemplate: '<b>Bom Pagador</b><br>%{x}: D/R %{y}×<extra></extra>',
+    },
+  ], {
     ...PL,
-    xaxis: { ...PL.xaxis, side: 'bottom', tickfont: { size: 11, color: CREAM } },
-    yaxis: { ...PL.yaxis, tickfont: { size: 11, color: CREAM }, autorange: 'reversed' },
-    margin: { l: 90, r: 70, t: 16, b: 50 },
-    annotations: [{
-      x: 'Cliente Potencial', y: 'R$3k–6k',
-      text: '⚠', showarrow: false,
-      font: { size: 18 }, xref: 'x', yref: 'y',
-      xanchor: 'right', xshift: 28,
-    }],
+    yaxis: { ...PL.yaxis, title: 'Razão D/R Média', ticksuffix: '×', range: [0, 1.75] },
+    xaxis: { ...PL.xaxis },
+    legend: { ...PL.legend, orientation: 'h', y: -0.22 },
+    margin: { l: 56, r: 16, t: 16, b: 65 },
+    shapes: [
+      // Linha de risco 1.0x
+      {
+        type: 'line', x0: 0, x1: 7, y0: 1.0, y1: 1.0,
+        xref: 'x', yref: 'y',
+        line: { color: 'rgba(201,168,76,0.4)', width: 1.5, dash: 'dash' },
+      },
+    ],
+    annotations: [
+      {
+        x: 'Mês 4', y: 1.03,
+        text: '1,0× — limiar de risco', showarrow: false,
+        font: { size: 9, color: GOLD }, xref: 'x', yref: 'y',
+      },
+      {
+        x: 'Mês 8', y: 1.18,
+        text: '1,15×', showarrow: false,
+        font: { size: 10, color: GOLD, family: 'DM Sans, sans-serif' },
+        xref: 'x', yref: 'y', xanchor: 'left', xshift: 6,
+      },
+    ],
   }, PC);
 }
 
@@ -614,6 +689,62 @@ function renderResultado(r,inp){
 
 function mc(l,v,s,c){return`<div class="result-metric-card" style="border-top:2px solid ${c}"><div class="rmc-label">${l}</div><div class="rmc-value" style="color:${c}">${v}</div><div class="rmc-sub">${s}</div></div>`;}
 function ab(t,i,tl,tx){return`<div class="alert-box ${t}"><div class="alert-icon">${i}</div><div><div class="alert-title">${tl}</div><div class="alert-text">${tx}</div></div></div>`;}
+
+function updateFilterRange(field){
+  const min = document.getElementById(`f-${field}-min`);
+  const max = document.getElementById(`f-${field}-max`);
+  let vMin = parseInt(min.value), vMax = parseInt(max.value);
+  if(vMin > vMax){ if(event.target === min) min.value = vMax; else max.value = vMin; vMin = parseInt(min.value); vMax = parseInt(max.value); }
+  if(field==='meses'){
+    document.getElementById('f-meses-min-val').textContent = vMin + (vMin===1?' mês':' meses');
+    document.getElementById('f-meses-max-val').textContent = vMax + ' meses';
+  } else {
+    document.getElementById('f-idade-min-val').textContent = vMin + ' anos';
+    document.getElementById('f-idade-max-val').textContent = vMax + ' anos';
+  }
+}
+
+function aplicarFiltros(){
+  const potAtivo  = document.getElementById('f-potencial').checked;
+  const bomAtivo  = document.getElementById('f-bom').checked;
+  const inadAtivo = document.getElementById('f-inad').checked;
+  const renda     = document.getElementById('f-renda').value;
+  const mesesMin  = parseInt(document.getElementById('f-meses-min').value);
+  const mesesMax  = parseInt(document.getElementById('f-meses-max').value);
+  const idadeMin  = parseInt(document.getElementById('f-idade-min').value);
+  const idadeMax  = parseInt(document.getElementById('f-idade-max').value);
+
+  // Aplica visibilidade nos traces do gráfico de evolução de receita
+  const visEvolucao = [potAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly', inadAtivo ? true : 'legendonly'];
+  Plotly.restyle('chart-evolucao', { visible: visEvolucao });
+
+  // Aplica nos traces do gráfico de D/R evolução (ordem: inad, pot, bom)
+  const visDR = [inadAtivo ? true : 'legendonly', potAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly'];
+  Plotly.restyle('chart-drevolucao', { visible: visDR });
+
+  // Aplica nos traces do gráfico de área (ordem: inad, bom, pot)
+  const visArea = [inadAtivo ? true : 'legendonly', bomAtivo ? true : 'legendonly', potAtivo ? true : 'legendonly'];
+  Plotly.restyle('chart-area', { visible: visArea });
+
+  // Feedback visual nos cards de métrica
+  document.querySelector('.metric-card.gold').style.opacity    = potAtivo  ? '1' : '0.3';
+  document.querySelector('.metric-card.emerald').style.opacity = bomAtivo  ? '1' : '0.3';
+  document.querySelector('.metric-card.crimson').style.opacity = inadAtivo ? '1' : '0.3';
+}
+
+function resetFiltros(){
+  document.getElementById('f-potencial').checked = true;
+  document.getElementById('f-bom').checked       = true;
+  document.getElementById('f-inad').checked      = true;
+  document.getElementById('f-renda').value       = 'todos';
+  document.getElementById('f-meses-min').value   = '1';
+  document.getElementById('f-meses-max').value   = '8';
+  document.getElementById('f-idade-min').value   = '18';
+  document.getElementById('f-idade-max').value   = '80';
+  updateFilterRange('meses');
+  updateFilterRange('idade');
+  aplicarFiltros();
+}
 
 document.addEventListener('DOMContentLoaded',loadDashboard);
 </script>
