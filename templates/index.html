@@ -45,7 +45,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--crea
 /* SIDEBAR */
 #sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--ink);display:flex;flex-direction:column;border-right:1px solid var(--border);z-index:100;}
 .sidebar-brand{padding:28px 24px 22px;border-bottom:1px solid var(--border);}
-.vexor-logo{font-family:'IM Fell English',Georgia,serif;font-size:28px;letter-spacing:5px;line-height:1;margin-bottom:6px;user-select:none;}
+.vexor-logo{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:700;letter-spacing:3px;line-height:1;margin-bottom:6px;user-select:none;}
 .vexor-logo .vx-normal{color:#e8e4da;}
 .vexor-logo .vx-accent{color:#c9a84c;}
 .brand-tagline{font-size:10px;color:var(--cream-mute);letter-spacing:2px;text-transform:uppercase;margin-left:2px;}
@@ -68,7 +68,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--crea
 /* MAIN */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);}
 .topbar{background:var(--ink-2);border-bottom:1px solid var(--border);padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-title{font-family:'IM Fell English',Georgia,serif;font-size:18px;color:var(--cream);}
+.topbar-title{font-family:'DM Sans',sans-serif;font-weight:600;font-size:18px;color:var(--cream);}
 .topbar-subtitle{font-size:11px;color:var(--cream-mute);margin-top:2px;}
 .topbar-right{display:flex;align-items:center;gap:12px;}
 .status-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--emerald-light);background:var(--emerald-dim);border:1px solid rgba(42,122,94,0.25);padding:4px 12px;border-radius:20px;font-weight:500;}
@@ -94,7 +94,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--crea
 .metric-card.crimson .metric-icon{background:var(--crimson-dim);}
 .metric-card.blue .metric-icon{background:var(--blue-dim);}
 .metric-label{font-size:10px;font-weight:500;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;}
-.metric-value{font-family:'IM Fell English',Georgia,serif;font-size:24px;color:var(--cream);line-height:1;margin-bottom:5px;}
+.metric-value{font-family:'DM Sans',sans-serif;font-weight:700;font-size:28px;color:var(--cream);line-height:1;margin-bottom:5px;}
 .metric-sub{font-size:11px;color:var(--cream-mute);}
 .metric-badge{position:absolute;top:14px;right:14px;font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;}
 .badge-gold{background:var(--gold-dim);color:var(--gold);}
@@ -114,10 +114,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--crea
 /* INSIGHT BOX */
 .insight-box{background:linear-gradient(135deg,var(--ink) 0%,var(--ink-3) 100%);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius-lg);padding:22px 26px;margin-bottom:18px;display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;box-shadow:var(--shadow-md);}
 .insight-icon{font-size:28px;}
-.insight-text strong{font-family:'IM Fell English',Georgia,serif;font-size:16px;display:block;margin-bottom:5px;color:var(--gold-light);}
+.insight-text strong{font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;display:block;margin-bottom:5px;color:var(--gold-light);}
 .insight-text p{font-size:12.5px;color:var(--cream-mute);line-height:1.55;}
 .insight-stat{text-align:right;}
-.insight-stat .big{font-family:'IM Fell English',Georgia,serif;font-size:32px;color:var(--gold-light);line-height:1;}
+.insight-stat .big{font-family:'DM Sans',sans-serif;font-weight:700;font-size:36px;color:var(--gold-light);line-height:1;}
 .insight-stat .sm{font-size:10px;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;}
 
 /* SECTION LABEL */
@@ -127,7 +127,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--crea
 /* SIMULATOR */
 .simulator-layout{display:grid;grid-template-columns:330px 1fr;gap:22px;align-items:start;}
 .sim-form-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);position:sticky;top:0;}
-.sim-form-title{font-family:'IM Fell English',Georgia,serif;font-size:16px;color:var(--cream);margin-bottom:4px;}
+.sim-form-title{font-family:'DM Sans',sans-serif;font-weight:600;font-size:16px;color:var(--cream);margin-bottom:4px;}
 .sim-form-subtitle{font-size:11px;color:var(--cream-mute);margin-bottom:20px;line-height:1.4;}
 .form-group{margin-bottom:15px;}
 .form-label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--cream-mute);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.6px;}
@@ -152,15 +152,15 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 .result-hero.bom{background:var(--ink-2);border:1px solid rgba(42,122,94,0.25);}
 .result-hero.inadimplente{background:var(--ink-2);border:1px solid rgba(160,48,48,0.25);}
 .result-persona-icon{font-size:46px;line-height:1;}
-.result-persona-name{font-family:'IM Fell English',Georgia,serif;font-size:20px;color:var(--cream);margin-bottom:6px;}
+.result-persona-name{font-family:'DM Sans',sans-serif;font-weight:700;font-size:22px;color:var(--cream);margin-bottom:6px;}
 .result-persona-desc{font-size:12.5px;line-height:1.6;color:var(--cream-mute);}
 .result-score-ring{margin-left:auto;text-align:center;}
-.score-ring-value{font-family:'IM Fell English',Georgia,serif;font-size:30px;}
+.score-ring-value{font-family:'DM Sans',sans-serif;font-weight:700;font-size:34px;}
 .score-ring-label{font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:var(--cream-mute);}
 .result-metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .result-metric-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
 .rmc-label{font-size:10px;color:var(--cream-mute);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;}
-.rmc-value{font-family:'IM Fell English',Georgia,serif;font-size:18px;color:var(--cream);}
+.rmc-value{font-family:'DM Sans',sans-serif;font-weight:700;font-size:22px;color:var(--cream);}
 .rmc-sub{font-size:10px;color:var(--cream-mute);margin-top:2px;}
 .alert-box{border-radius:var(--radius);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
 .alert-box.ruptura{background:rgba(160,48,48,0.1);border:1px solid rgba(160,48,48,0.2);}
@@ -212,15 +212,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="nav-icon">🎯</div><span>Motor de Análise</span><span class="nav-badge">Micro</span>
     </a>
   </div>
-  <div class="sidebar-section" style="margin-top:6px;">
-    <div class="sidebar-section-label">Estudo</div>
-    <div style="padding:0 8px;">
-      <div class="sidebar-stat"><span class="sidebar-stat-label">Base Analisada</span><span class="sidebar-stat-value">12.500</span></div>
-      <div class="sidebar-stat"><span class="sidebar-stat-label">Horizonte</span><span class="sidebar-stat-value">8 meses</span></div>
-      <div class="sidebar-stat"><span class="sidebar-stat-label">Taxa Rotativo</span><span class="sidebar-stat-value">15,05% a.m.</span></div>
-      <div class="sidebar-stat"><span class="sidebar-stat-label">Razão D/R Crítica</span><span class="sidebar-stat-value">1,10×</span></div>
-    </div>
-  </div>
   <div class="sidebar-footer">
     <div class="study-badge">🔬 Descoberta: O <strong>Cliente Potencial</strong> — invisível ao risco, gerador de 98,6% da receita de juros.</div>
   </div>
@@ -230,7 +221,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
   <div class="topbar">
     <div>
       <div class="topbar-title" id="topbar-title">Dashboard de Segmentação</div>
-      <div class="topbar-subtitle" id="topbar-subtitle">Visão macro • 12.500 clientes • 8 meses de dados</div>
     </div>
     <div class="topbar-right">
       <div class="status-pill"><div class="status-dot"></div>Dados Ativos</div>
@@ -401,9 +391,8 @@ function showPage(id){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.getElementById('nav-'+id).classList.add('active');
-  const t={dashboard:["Dashboard de Segmentação","Visão macro • 12.500 clientes • 8 meses de dados"],simulator:["Motor de Análise de Crédito","Simulador individual de classificação e lucratividade"]};
-  document.getElementById('topbar-title').textContent=t[id][0];
-  document.getElementById('topbar-subtitle').textContent=t[id][1];
+  const t={dashboard:"Dashboard de Segmentação",simulator:"Motor de Análise de Crédito"};
+  document.getElementById('topbar-title').textContent=t[id];
 }
 
 function updateRange(f){
