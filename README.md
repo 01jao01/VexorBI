@@ -1,4 +1,4 @@
-# CreditIQ — Motor de Análise de Crédito
+# Vexor — Motor de Análise de Crédito
 
 Sistema de análise e segmentação de carteira de crédito para **12.500 clientes** ao longo de **8 meses**.
 
