@@ -454,7 +454,6 @@ function updateRange(f){
   document.getElementById(m[f].disp).textContent=m[f].fmt(document.getElementById(m[f].id).value);
 }
 
-function selectScore(v,b){selectedScore=v;document.querySelectorAll('.score-btn').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}
 function selectAtraso(v){selectedAtrasos=v;document.getElementById('btn-atraso-sim').classList.toggle('selected',v);document.getElementById('btn-atraso-nao').classList.toggle('selected',!v);}
 function fmtBRL(v){if(Math.abs(v)>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$ '+(v/1e3).toFixed(1)+'K';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
@@ -556,6 +555,8 @@ function renderRPC(){
     ],
   },PC);
 }
+
+function renderArea(d){
   const ar = d.area;
   Plotly.newPlot('chart-area', [
     {
