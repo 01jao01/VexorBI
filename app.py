@@ -9,8 +9,20 @@ from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
-TAXA_JUROS_MENSAL = 0.1505
-TOTAL_CLIENTES    = 12500
+TAXA_JUROS_MENSAL     = 0.1505   # 15,05% a.m. — crédito rotativo (438% a.a.)
+TAXA_JUROS_PARCELADO  = 0.0925   # 9,25% a.m.  — cartão parcelado (189% a.a.)
+TOTAL_CLIENTES        = 12500
+
+# Alvos do estudo (Banco Central dez/2025)
+RECEITA_ALVO = {
+    "potencial":    14_848_743,
+    "inadimplente":    375_038,
+    "bom":              25_106,
+}
+# Receita por cliente alvo → define a dívida média de cada perfil
+# Potencial:    R$2.017/cliente ÷ 15,05% ÷ 5,9 meses ≈ R$2.270
+# Inadimplente: R$347/cliente  ÷  9,25% ÷ 3,5 meses ≈ R$1.072
+# Bom Pagador:  R$6/cliente    ÷ 15,05% ÷ 1 mês     ≈ R$40  (praticamente zero)
 
 # ─────────────────────────────────────────────
 # GERAÇÃO DA BASE COMPLETA (executada uma vez)
@@ -56,22 +68,30 @@ def _gerar_base():
                 meses = rng.choices(range(1, 9), weights=[3,4,6,9,13,18,25,22])[0]
 
             # ── Razão D/R e dívida ──
+            # Dívidas calibradas para que receita total bata com o estudo do grupo:
+            # Potencial → R$14.848.743 (dívida média ~R$2.270)
+            # Inadimplente → R$375.038 (dívida média ~R$1.072, taxa 9,25%)
+            # Bom Pagador → R$25.106 (praticamente sem juros)
             salario_anual = salario * 12
             if perfil == "bom":
-                razao = max(0.05, rng.gauss(0.32, 0.12))
+                divida = max(10, rng.gauss(41, 20))         # saldo residual mínimo — R$41 média
+                razao  = divida / salario_anual
             elif perfil == "inadimplente":
-                razao = max(0.60, rng.gauss(1.28, 0.25))
+                divida = max(200, rng.gauss(1_066, 380))    # saldo parcelado — R$1.066 média
+                razao  = divida / salario_anual
             else:
-                razao = max(0.55, rng.gauss(1.10, 0.14))
-            divida = salario_anual * razao
+                divida = max(500, rng.gauss(2_270, 700))    # saldo rotativo — R$2.270 média
+                razao  = divida / salario_anual
 
-            # ── Receita de juros gerada ──
+            # ── Receita de juros gerada (fórmula do grupo) ──
+            # Receita = Dívida_Pendente × taxa_mensal × meses_rotativo
             if perfil == "potencial":
                 receita = divida * TAXA_JUROS_MENSAL * meses
             elif perfil == "bom":
-                receita = divida * TAXA_JUROS_MENSAL * max(1, meses - 5)
+                receita = divida * TAXA_JUROS_MENSAL * 1     # 1 mês residual
             else:
-                receita = -(divida * 0.35)  # perda estimada
+                # Inadimplente: receita positiva para o banco (juros do parcelado)
+                receita = divida * TAXA_JUROS_PARCELADO * meses
 
             clientes.append({
                 "perfil":         perfil,
@@ -300,7 +320,6 @@ def classificar_cliente(idade, salario_mensal, atrasos, divida_pendente, meses_r
     # ── Cálculos financeiros ──
     receita_mensal_juros = divida_pendente * TAXA_JUROS_MENSAL
     receita_projetada    = receita_mensal_juros * min(meses_rotativo, 8)
-
     margem_disponivel    = (salario_mensal * 0.30) - pagamento_minimo
     credito_adicional    = max(0, (margem_disponivel / 0.05) if margem_disponivel > 0 else 0)
 
