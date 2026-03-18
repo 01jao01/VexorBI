@@ -598,55 +598,115 @@ async function analisarCliente(){
 
 function renderResultado(r,inp){
   const area=document.getElementById('result-area');
-  const pm={potencial:{label:'Cliente Potencial',icon:'🪙',cls:'potencial',color:GOLD,cv:'var(--gold)'},bom:{label:'Bom Pagador',icon:'🛡️',cls:'bom',color:EMERALD_L,cv:'var(--emerald-light)'},inadimplente:{label:'Inadimplente',icon:'⚠️',cls:'inadimplente',color:CRIMSON_L,cv:'var(--crimson-light)'}};
+  const pm={
+    potencial:    {label:'Cliente Potencial', icon:'🪙', cls:'potencial',    color:GOLD,      cv:'var(--gold)'},
+    bom:          {label:'Bom Pagador',        icon:'🛡️', cls:'bom',          color:EMERALD_L, cv:'var(--emerald-light)'},
+    inadimplente: {label:'Inadimplente',       icon:'⚠️', cls:'inadimplente', color:CRIMSON_L, cv:'var(--crimson-light)'},
+  };
   const p=pm[r.perfil];
-  const dm={potencial:`Perfil <b style="color:${p.cv}">altamente lucrativo</b> e invisível ao risco tradicional. Paga o mínimo, entra cronicamente no rotativo. Razão D/R de <b style="color:${p.cv}">${r.razao_divida_renda}×</b> indica pressão financeira estrutural.`,bom:`Perfil <b style="color:${p.cv}">confiável e seguro</b>. Honra compromissos integralmente, mas gera <b>baixíssima receita de juros</b>. Prioridade: retenção e cross-sell.`,inadimplente:`Perfil de <b style="color:${p.cv}">risco severo</b>. Histórico de atrasos com alta pressão de dívida. Ação imediata de cobrança recomendada.`};
+  const dm={
+    potencial:    `Perfil <b style="color:${p.cv}">altamente lucrativo</b> e invisível ao risco tradicional. Paga o mínimo, entra cronicamente no rotativo. Score de pressão financeira: <b style="color:${p.cv}">${r.score_interno}/100</b>.`,
+    bom:          `Perfil <b style="color:${p.cv}">confiável e seguro</b>. Honra compromissos integralmente, mas gera <b>baixíssima receita de juros</b>. Prioridade: retenção e cross-sell.`,
+    inadimplente: `Perfil de <b style="color:${p.cv}">risco severo</b>. Histórico de atrasos com alta pressão financeira. Probabilidade de ruptura: <b style="color:${p.cv}">${r.prob_ruptura}%</b>.`,
+  };
 
-  let h=`<div class="result-hero ${p.cls}"><div class="result-persona-icon">${p.icon}</div><div><div class="result-persona-name">${p.label}</div><div class="result-persona-desc">${dm[r.perfil]}</div></div><div class="result-score-ring"><div class="score-ring-value" style="color:${p.color}">${r.score_interno}</div><div class="score-ring-label">Score Interno</div></div></div>`;
+  // ── Hero card ──
+  let h=`<div class="result-hero ${p.cls}">
+    <div class="result-persona-icon">${p.icon}</div>
+    <div style="flex:1">
+      <div class="result-persona-name">${p.label}</div>
+      <div class="result-persona-desc">${dm[r.perfil]}</div>
+    </div>
+    <div class="result-score-ring">
+      <div class="score-ring-value" style="color:${p.color}">${r.score_interno}</div>
+      <div class="score-ring-label">Pressão Fin.</div>
+    </div>
+  </div>`;
+
+  // ── Probabilidades do modelo ML ──
+  const probs = r.prob_perfis || {};
+  const probPot  = (probs.potencial    || 0).toFixed(1);
+  const probBom  = (probs.bom          || 0).toFixed(1);
+  const probInad = (probs.inadimplente || 0).toFixed(1);
+  h+=`<div class="chart-card" style="padding:14px 18px;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--cream-mute);margin-bottom:12px;">Probabilidade por Perfil — Random Forest</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${probBar('Cliente Potencial', probPot, GOLD)}
+      ${probBar('Bom Pagador',       probBom, EMERALD_L)}
+      ${probBar('Inadimplente',      probInad, CRIMSON_L)}
+    </div>
+  </div>`;
+
+  // ── Métricas ──
   h+=`<p class="section-label">Indicadores Calculados</p><div class="result-metrics-grid">`;
-
   if(r.perfil==='potencial'){
-    h+=mc('Juros Mensais Gerados',fmtBRL(r.receita_mensal_juros),'Taxa 15,05% a.m.',GOLD);
-    h+=mc('Receita Projetada ('+r.meses_rotativo+'m)',fmtBRL(r.receita_projetada_8m),'Se permanecer no rotativo',GOLD);
-    h+=mc('Comprometimento Atual',r.comprometimento_atual_pct+'%','da renda com mínimo',r.comprometimento_atual_pct>30?CRIMSON_L:GOLD);
-    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Média de risco: 1,10×',r.razao_divida_renda>1.0?CRIMSON_L:EMERALD_L);
-    h+=mc('Crédito Adicional Máx.',fmtBRL(r.credito_adicional_max),'Limite: 30% comprometimento',BLUE_L);
-    h+=mc('Mín. Sobre Nova Oferta',fmtBRL(r.credito_adicional_max*0.05),'Pagamento mín. adicional',BLUE_L);
+    h+=mc('Juros Mensais Gerados', fmtBRL(r.receita_mensal_juros), 'Taxa 15,05% a.m.', GOLD);
+    h+=mc('Receita Projetada ('+r.meses_rotativo+'m)', fmtBRL(r.receita_projetada_8m), 'Se permanecer no rotativo', GOLD);
+    h+=mc('Comprometimento Atual', r.comprometimento_atual_pct+'%', 'da renda com mínimo', r.comprometimento_atual_pct>30?CRIMSON_L:GOLD);
+    h+=mc('Razão Dívida/Renda', r.razao_divida_renda+'×', 'Pressão relativa à renda anual', r.razao_divida_renda>0.1?CRIMSON_L:EMERALD_L);
+    h+=mc('Crédito Adicional Máx.', fmtBRL(r.credito_adicional_max), 'Limite: 30% comprometimento', BLUE_L);
+    h+=mc('Mín. Sobre Nova Oferta', fmtBRL(r.credito_adicional_max*0.05), 'Pagamento mín. adicional', BLUE_L);
   }else if(r.perfil==='bom'){
-    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Confortável — baixo risco',EMERALD_L);
-    h+=mc('Score Interno',r.score_interno+'/100','Pontuação Vexor',EMERALD_L);
-    h+=mc('Comprometimento',r.comprometimento_atual_pct+'%','da renda',EMERALD_L);
-    h+=mc('Receita de Juros',fmtBRL(r.receita_mensal_juros),'Muito baixa',BLUE_L);
-    h+=mc('Potencial Cross-sell',fmtBRL(r.credito_adicional_max*1.5),'Limite adicional sugerido',BLUE_L);
-    h+=mc('Prob. de Ruptura',r.prob_ruptura+'%','Muito baixa',EMERALD_L);
+    h+=mc('Razão Dívida/Renda', r.razao_divida_renda+'×', 'Confortável — baixo risco', EMERALD_L);
+    h+=mc('Score de Pressão', r.score_interno+'/100', 'Pontuação Vexor', EMERALD_L);
+    h+=mc('Comprometimento', r.comprometimento_atual_pct+'%', 'da renda com mínimo', EMERALD_L);
+    h+=mc('Receita de Juros', fmtBRL(r.receita_mensal_juros), 'Muito baixa — sem rotativo', BLUE_L);
+    h+=mc('Potencial Cross-sell', fmtBRL(r.credito_adicional_max*1.5), 'Limite adicional sugerido', BLUE_L);
+    h+=mc('Prob. de Ruptura', r.prob_ruptura+'%', 'Muito baixa neste perfil', EMERALD_L);
   }else{
-    h+=mc('Razão Dívida/Renda',r.razao_divida_renda+'×','Nível crítico',CRIMSON_L);
-    h+=mc('Score Interno',r.score_interno+'/100','Pontuação Vexor',CRIMSON_L);
-    h+=mc('Prob. de Ruptura',r.prob_ruptura+'%','Alto risco',CRIMSON_L);
-    h+=mc('Comprometimento',r.comprometimento_atual_pct+'%','da renda',CRIMSON_L);
-    h+=mc('Exposição em Dívida',fmtBRL(inp.divida_pendente),'Perda potencial',CRIMSON_L);
-    h+=mc('Ação Recomendada','Bloqueio','Sem crédito adicional',CRIMSON_L);
+    h+=mc('Razão Dívida/Renda', r.razao_divida_renda+'×', 'Nível crítico', CRIMSON_L);
+    h+=mc('Score de Pressão', r.score_interno+'/100', 'Pontuação Vexor', CRIMSON_L);
+    h+=mc('Prob. de Ruptura', r.prob_ruptura+'%', 'Alto risco de calote', CRIMSON_L);
+    h+=mc('Comprometimento', r.comprometimento_atual_pct+'%', 'da renda com mínimo', CRIMSON_L);
+    h+=mc('Exposição em Dívida', fmtBRL(inp.divida_pendente), 'Perda potencial', CRIMSON_L);
+    h+=mc('Ação Recomendada', 'Bloqueio', 'Sem crédito adicional', CRIMSON_L);
   }
   h+=`</div>`;
 
+  // ── Barra de comprometimento ──
   const cp=Math.min(100,r.comprometimento_atual_pct),cc=cp>35?CRIMSON_L:cp>25?GOLD:EMERALD_L;
-  h+=`<p class="section-label">Comprometimento de Renda</p><div class="chart-card" style="padding:16px 18px;"><div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="font-size:11px;color:var(--cream-mute)">Comprometimento com pagamento mínimo</span><span style="font-size:12px;font-weight:600;color:${cc}">${r.comprometimento_atual_pct}% da renda</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${cp}%;background:${cc}"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;"><span style="font-size:9px;color:var(--cream-mute)">0%</span><span style="font-size:9px;color:var(--emerald-light)">Ideal: até 25%</span><span style="font-size:9px;color:var(--gold)">Máx: 30%</span><span style="font-size:9px;color:var(--crimson-light)">Crítico: &gt;35%</span><span style="font-size:9px;color:var(--cream-mute)">100%</span></div></div>`;
+  h+=`<p class="section-label">Comprometimento de Renda</p>
+  <div class="chart-card" style="padding:16px 18px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;">
+      <span style="font-size:11px;color:var(--cream-mute)">Comprometimento com pagamento mínimo</span>
+      <span style="font-size:12px;font-weight:600;color:${cc}">${r.comprometimento_atual_pct}% da renda</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${cp}%;background:${cc}"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px;">
+      <span style="font-size:9px;color:var(--cream-mute)">0%</span>
+      <span style="font-size:9px;color:var(--emerald-light)">Ideal: até 25%</span>
+      <span style="font-size:9px;color:var(--gold)">Máx: 30%</span>
+      <span style="font-size:9px;color:var(--crimson-light)">Crítico: &gt;35%</span>
+      <span style="font-size:9px;color:var(--cream-mute)">100%</span>
+    </div>
+  </div>`;
 
+  // ── Alertas estratégicos ──
   h+=`<p class="section-label">Alertas Estratégicos</p>`;
   if(r.perfil==='potencial'){
-    h+=ab('ruptura','🔴','Risco de Ruptura',`Se este cliente perder a fonte de renda, a dívida de <b>${fmtBRL(inp.divida_pendente)}</b> torna-se impagável. Razão D/R de <b>${r.razao_divida_renda}×</b>. Probabilidade de ruptura: <b>${r.prob_ruptura}%</b>.`);
+    h+=ab('ruptura','🔴','Risco de Ruptura',`Se este cliente perder a fonte de renda, a dívida de <b>${fmtBRL(inp.divida_pendente)}</b> torna-se impagável. Probabilidade de ruptura estimada: <b>${r.prob_ruptura}%</b>.`);
     h+=ab('oport','🟢','Risco de Oportunidade — Oferta de Crédito',`Este cliente suporta oferta adicional de até <b>${fmtBRL(r.credito_adicional_max)}</b> sem ultrapassar 30% de comprometimento. Pagamento mínimo incremental: <b>${fmtBRL(r.credito_adicional_max*0.05)}/mês</b>, gerando <b>${fmtBRL(r.credito_adicional_max*0.1505)}/mês</b> em juros.`);
     h+=ab('aviso','🟡','Monitoramento Contínuo',`Cliente crônico no rotativo há ${inp.meses_rotativo} meses. Revisão trimestral recomendada. Evitar expansão de limite sem análise atualizada de renda.`);
   }else if(r.perfil==='bom'){
     h+=ab('info','🔵','Segurança Operacional — Baixa Lucratividade',`Cliente excelente em risco, mas gera apenas <b>${fmtBRL(r.receita_mensal_juros)}/mês</b> em juros. Estratégia ideal: cross-sell de produtos de maior margem (consórcio, seguros, investimentos).`);
-    h+=ab('oport','🟢','Oportunidade de Expansão de Limite',`Com razão D/R de <b>${r.razao_divida_renda}×</b> e histórico limpo, suporta ampliação. Limite adicional sugerido: <b>${fmtBRL(r.credito_adicional_max*1.5)}</b>.`);
+    h+=ab('oport','🟢','Oportunidade de Expansão de Limite',`Com histórico limpo, suporta ampliação de crédito. Limite adicional sugerido: <b>${fmtBRL(r.credito_adicional_max*1.5)}</b>.`);
   }else{
-    h+=ab('ruptura','🔴','Risco Severo — Ação Imediata',`Score baixo com atrasos e razão D/R de <b>${r.razao_divida_renda}×</b>. Probabilidade de ruptura: <b>${r.prob_ruptura}%</b>. Bloquear novas concessões e acionar renegociação.`);
+    h+=ab('ruptura','🔴','Risco Severo — Ação Imediata',`Probabilidade de ruptura estimada em <b>${r.prob_ruptura}%</b>. Bloquear novas concessões e acionar equipe de renegociação imediatamente.`);
     h+=ab('aviso','🟡','Estratégia de Recuperação',`Proposta de renegociação com desconto em juros e parcelamento do saldo. Recuperação parcial preferível à perda total de <b>${fmtBRL(inp.divida_pendente)}</b>.`);
   }
+
   area.innerHTML=h;
 }
 
+function probBar(label, pct, color){
+  return `<div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:11px;color:var(--cream-mute);width:130px;flex-shrink:0">${label}</span>
+    <div style="flex:1;background:rgba(232,228,218,0.07);border-radius:3px;height:8px;overflow:hidden;">
+      <div style="width:${pct}%;height:100%;background:${color};border-radius:3px;transition:width 0.5s ease;"></div>
+    </div>
+    <span style="font-size:12px;font-weight:600;color:${color};width:44px;text-align:right">${pct}%</span>
+  </div>`;
+}
 function mc(l,v,s,c){return`<div class="result-metric-card" style="border-top:2px solid ${c}"><div class="rmc-label">${l}</div><div class="rmc-value" style="color:${c}">${v}</div><div class="rmc-sub">${s}</div></div>`;}
 function ab(t,i,tl,tx){return`<div class="alert-box ${t}"><div class="alert-icon">${i}</div><div><div class="alert-title">${tl}</div><div class="alert-text">${tx}</div></div></div>`;}
 
