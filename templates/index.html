@@ -264,8 +264,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
         <span class="filter-range-val" id="f-meses-max-val">8 meses</span>
       </div>
       <div class="filter-dual">
-        <input type="range" id="f-meses-min" min="1" max="8" value="1" oninput="updateFilterRange('meses')"/>
-        <input type="range" id="f-meses-max" min="1" max="8" value="8" oninput="updateFilterRange('meses')"/>
+        <input type="range" id="f-meses-min" min="1" max="8" value="1" oninput="updateFilterRange('meses')" onchange="aplicarFiltros()"/>
+        <input type="range" id="f-meses-max" min="1" max="8" value="8" oninput="updateFilterRange('meses')" onchange="aplicarFiltros()"/>
       </div>
     </div>
 
@@ -277,8 +277,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
         <span class="filter-range-val" id="f-idade-max-val">80 anos</span>
       </div>
       <div class="filter-dual">
-        <input type="range" id="f-idade-min" min="18" max="80" value="18" step="1" oninput="updateFilterRange('idade')"/>
-        <input type="range" id="f-idade-max" min="18" max="80" value="80" step="1" oninput="updateFilterRange('idade')"/>
+        <input type="range" id="f-idade-min" min="18" max="80" value="18" step="1" oninput="updateFilterRange('idade')" onchange="aplicarFiltros()"/>
+        <input type="range" id="f-idade-max" min="18" max="80" value="80" step="1" oninput="updateFilterRange('idade')" onchange="aplicarFiltros()"/>
       </div>
     </div>
 
@@ -409,14 +409,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
             <input type="range" id="input-salario" min="1000" max="30000" step="500" value="5000" oninput="updateRange('salario')"/>
           </div>
           <div class="form-group">
-            <div class="form-label"><span>📈</span> Score de Crédito</div>
-            <div class="score-toggle-group">
-              <button class="score-btn low selected" onclick="selectScore('Baixo',this)">🔴 Baixo<br><small style="font-size:10px;font-weight:400">&lt;500</small></button>
-              <button class="score-btn good" onclick="selectScore('Bom',this)">🟡 Bom<br><small style="font-size:10px;font-weight:400">500–750</small></button>
-              <button class="score-btn great" onclick="selectScore('Ótimo',this)">🟢 Ótimo<br><small style="font-size:10px;font-weight:400">&gt;750</small></button>
-            </div>
-          </div>
-          <div class="form-group">
             <div class="form-label"><span>⏰</span> Histórico de Atrasos</div>
             <div class="toggle-group">
               <button class="toggle-btn selected" id="btn-atraso-sim" onclick="selectAtraso(true)">✓ Sim</button>
@@ -450,7 +442,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 </div>
 
 <script>
-let selectedScore="Baixo",selectedAtrasos=true;
+let selectedAtrasos=true;
 const GOLD="#c9a84c",GOLD_L="#e2c46e",EMERALD_L="#35a07a",CRIMSON_L="#c44444",BLUE_L="#3b6bbf",CREAM="#e8e4da";
 const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{family:'DM Sans,sans-serif',color:'#e8e4da',size:11},margin:{l:48,r:16,t:8,b:40},legend:{bgcolor:'transparent',borderwidth:0,font:{size:11,color:'#e8e4da'}},xaxis:{gridcolor:'rgba(232,228,218,0.06)',zerolinecolor:'rgba(232,228,218,0.1)',tickfont:{size:10,color:'rgba(232,228,218,0.5)'}},yaxis:{gridcolor:'rgba(232,228,218,0.06)',zerolinecolor:'rgba(232,228,218,0.1)',tickfont:{size:10,color:'rgba(232,228,218,0.5)'}}};
 const PC={displayModeBar:false,responsive:true};
@@ -585,7 +577,7 @@ function renderRazao(d){
 
 async function analisarCliente(){
   document.getElementById('loadingOverlay').classList.add('active');
-  const p={idade:parseInt(document.getElementById('input-idade').value),salario_mensal:parseFloat(document.getElementById('input-salario').value),score:selectedScore,atrasos:selectedAtrasos,divida_pendente:parseFloat(document.getElementById('input-divida').value),meses_rotativo:parseInt(document.getElementById('input-meses').value)};
+  const p={idade:parseInt(document.getElementById('input-idade').value),salario_mensal:parseFloat(document.getElementById('input-salario').value),atrasos:selectedAtrasos,divida_pendente:parseFloat(document.getElementById('input-divida').value),meses_rotativo:parseInt(document.getElementById('input-meses').value)};
   try{renderResultado(await(await fetch('/api/analisar-cliente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)})).json(),p);}
   finally{document.getElementById('loadingOverlay').classList.remove('active');}
 }
