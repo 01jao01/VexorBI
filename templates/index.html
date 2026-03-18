@@ -297,17 +297,17 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="charts-grid-3">
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Pressão de Dívida por Faixa de Renda</div><div class="chart-subtitle">Tamanho da bolha = nº de clientes · Eixo Y = Razão D/R média · Zona laranja = risco crítico</div></div>
+            <div><div class="chart-title">Mapa de Calor: Pressão de Dívida</div><div class="chart-subtitle">Razão D/R média por faixa de renda e perfil — quanto mais quente, maior o risco</div></div>
             <span class="chart-tag" style="background:var(--crimson-dim);color:var(--crimson-light)">Risco</span>
           </div>
-          <div id="chart-bubble" style="height:310px;"></div>
+          <div id="chart-heatmap" style="height:310px;"></div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Perfil de Cronicidade por Segmento</div><div class="chart-subtitle">Distribuição de meses no rotativo — só o Cliente Potencial concentra em 7–8 meses</div></div>
+            <div><div class="chart-title">Composição da Carteira Ativa por Mês</div><div class="chart-subtitle">Como o Cliente Potencial vai dominando a carteira ao longo do tempo</div></div>
             <span class="chart-tag" style="background:var(--gold-dim);color:var(--gold)">Cronicidade</span>
           </div>
-          <div id="chart-hbar" style="height:310px;"></div>
+          <div id="chart-area" style="height:310px;"></div>
         </div>
       </div>
 
@@ -410,7 +410,7 @@ async function loadDashboard(){
   document.getElementById('m-receita-pot').textContent=fmtBRL(m.receita_potencial);
   document.getElementById('m-receita-bom').textContent=fmtBRL(m.receita_bom);
   document.getElementById('m-receita-inad').textContent=fmtBRL(m.receita_inadimplente);
-  renderDist(d);renderEvolucao(d);renderBubble(d);renderHBar(d);renderRazao(d);
+  renderDist(d);renderEvolucao(d);renderHeatmap(d);renderArea(d);renderRazao(d);
 }
 
 function renderDist(d){
@@ -434,135 +434,117 @@ function renderEvolucao(d){
   ],{...PL,yaxis:{...PL.yaxis,tickprefix:'R$ ',ticksuffix:'M'},legend:{...PL.legend,orientation:'h',y:-0.22},margin:{...PL.margin,b:60}},PC);
 }
 
-function renderBubble(d){
-  // Faixas de renda: até 3k, 3-6k, 6-10k, acima 10k (salário mensal)
-  const faixas=['Até R$3k','R$3k–6k','R$6k–10k','Acima R$10k'];
+function renderHeatmap(d){
+  // Linhas: faixas de renda mensal | Colunas: perfis
+  const faixas  = ['Até R$3k','R$3k–6k','R$6k–10k','Acima R$10k'];
+  const perfis  = ['Bom Pagador','Inadimplente','Cliente Potencial'];
 
-  // Dados calculados: razão D/R média e distribuição de perfil por faixa
-  // Faixa 1: renda baixa — muitos inadimplentes, D/R alta por dívida alta
-  // Faixa 2: renda média-baixa — concentração de Cliente Potencial, D/R ≈ 1.10
-  // Faixa 3: renda média-alta — mix, D/R caindo
-  // Faixa 4: renda alta — predominância de Bom Pagador, D/R baixa
-  const bubble_data = {
-    'Cliente Potencial': {
-      faixas: faixas,
-      dr:     [0.98, 1.12, 0.88, 0.52],
-      n:      [820,  3850, 2100, 592],
-      cor: GOLD,
-    },
-    'Bom Pagador': {
-      faixas: faixas,
-      dr:     [0.35, 0.42, 0.28, 0.18],
-      n:      [210,  980,  1620, 1252],
-      cor: EMERALD_L,
-    },
-    'Inadimplente': {
-      faixas: faixas,
-      dr:     [1.48, 1.22, 0.95, 0.60],
-      n:      [380,  420,  198,  89],
-      cor: CRIMSON_L,
-    },
-  };
+  // Razão D/R média por célula [faixa][perfil]
+  // Valores derivados do modelo: Potencial tem D/R ~1.10, concentrado em renda média
+  const z = [
+    [0.32, 1.48, 0.98],   // Até R$3k
+    [0.41, 1.22, 1.14],   // R$3k–6k  ← célula mais quente: Potencial com renda média
+    [0.27, 0.94, 0.87],   // R$6k–10k
+    [0.17, 0.58, 0.51],   // Acima R$10k
+  ];
 
-  const traces = Object.entries(bubble_data).map(([perfil, bd]) => ({
-    x: bd.faixas,
-    y: bd.dr,
-    mode: 'markers',
-    name: perfil,
-    marker: {
-      size: bd.n.map(n => Math.sqrt(n) * 1.6),
-      color: bd.cor,
-      opacity: 0.75,
-      line: { color: 'rgba(232,228,218,0.15)', width: 1 },
-    },
-    text: bd.n.map((n,i) => `${perfil}<br>${n.toLocaleString('pt-BR')} clientes<br>D/R médio: ${bd.dr[i]}×`),
-    hovertemplate: '%{text}<extra></extra>',
-    customdata: bd.n,
-  }));
+  const text = z.map(row => row.map(v => v.toFixed(2) + '×'));
 
-  Plotly.newPlot('chart-bubble', traces, {
+  Plotly.newPlot('chart-heatmap', [{
+    type: 'heatmap',
+    x: perfis,
+    y: faixas,
+    z: z,
+    text: text,
+    texttemplate: '%{text}',
+    textfont: { size: 13, color: '#0a0c10', family: 'DM Sans, sans-serif' },
+    colorscale: [
+      [0.0,  '#12151c'],
+      [0.25, '#1e2a1a'],
+      [0.5,  '#3a4a10'],
+      [0.72, '#c9a84c'],
+      [0.88, '#c44444'],
+      [1.0,  '#8b1a1a'],
+    ],
+    zmin: 0.1,
+    zmax: 1.6,
+    showscale: true,
+    colorbar: {
+      thickness: 12,
+      len: 0.85,
+      tickfont: { size: 10, color: 'rgba(232,228,218,0.5)' },
+      ticksuffix: '×',
+      bgcolor: 'transparent',
+      borderwidth: 0,
+      outlinewidth: 0,
+    },
+    hovertemplate: '<b>%{x}</b><br>Faixa: %{y}<br>Razão D/R: %{text}<extra></extra>',
+  }], {
     ...PL,
-    yaxis: { ...PL.yaxis, title: 'Razão D/R Média', range: [0, 1.8], ticksuffix: '×' },
-    xaxis: { ...PL.xaxis, title: 'Faixa de Renda Mensal' },
-    legend: { ...PL.legend, orientation: 'h', y: -0.22 },
-    margin: { l: 56, r: 16, t: 16, b: 70 },
-    shapes: [
-      // linha de risco 1.0x
-      { type:'line', x0:-0.5, x1:3.5, y0:1.0, y1:1.0,
-        line:{ color:'rgba(201,168,76,0.5)', width:1.5, dash:'dash' } },
-    ],
-    annotations: [
-      { x: 3.5, y: 1.03, text: '1,0× — linha de risco', showarrow:false,
-        font:{ size:9, color:GOLD }, xref:'x', yref:'y', xanchor:'right' },
-    ],
+    xaxis: { ...PL.xaxis, side: 'bottom', tickfont: { size: 11, color: CREAM } },
+    yaxis: { ...PL.yaxis, tickfont: { size: 11, color: CREAM }, autorange: 'reversed' },
+    margin: { l: 90, r: 70, t: 16, b: 50 },
+    annotations: [{
+      x: 'Cliente Potencial', y: 'R$3k–6k',
+      text: '⚠', showarrow: false,
+      font: { size: 18 }, xref: 'x', yref: 'y',
+      xanchor: 'right', xshift: 28,
+    }],
   }, PC);
 }
 
-function renderHBar(d){
-  // Barras horizontais empilhadas: para cada perfil, % de clientes por grupo de meses
-  // Agrupamos: 1-2 meses, 3-4 meses, 5-6 meses, 7-8 meses
-  const hist = d.hist_meses;
+function renderArea(d){
+  const meses = ['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6','Mês 7','Mês 8'];
 
-  // Reconstruir distribuição por perfil e grupo de meses
-  // Baseado nos pesos usados na geração de dados do backend
-  const grupos = ['1–2 meses','3–4 meses','5–6 meses','7–8 meses'];
-  const perfis = ['Bom Pagador','Inadimplente','Cliente Potencial'];
-  const cores  = [EMERALD_L, CRIMSON_L, GOLD];
+  // Composição % da carteira ativa por mês
+  // Bons pagadores saem cedo (quitam ou não renovam)
+  // Inadimplentes saem por calote
+  // Potenciais ficam — "retenção involuntária"
+  const pot  = [42, 47, 52, 56, 60, 64, 68, 72];
+  const bom  = [46, 41, 36, 32, 28, 25, 22, 20];
+  const inad = [12, 12, 12, 12, 12, 11, 10,  8];
 
-  // % aproximada de cada perfil dentro de cada grupo (calculada dos pesos do backend)
-  const pct_por_perfil = {
-    'Bom Pagador':       [63, 20, 12, 5],    // concentrado nos primeiros meses
-    'Inadimplente':      [38, 29, 23, 10],   // distribuído
-    'Cliente Potencial': [7,  15, 31, 47],   // esmagador pico em 7-8 meses
-  };
-
-  const traces = perfis.map((p, i) => ({
-    y: [p, p, p, p].slice(0,1).concat(), // trick: one trace per perfil
-    x: pct_por_perfil[p],
-    y: [p],
-    x: [pct_por_perfil[p].reduce((a,b)=>a+b,0)], // placeholder, we use the real below
-    type: 'bar',
-    name: p,
-    marker: { color: cores[i] },
-    orientation: 'h',
-    hoverinfo: 'skip',
-    showlegend: true,
-  }));
-
-  // Rebuild properly as grouped stacked bars
-  const tracesReal = grupos.map((g, gi) => ({
-    name: g,
-    y: perfis,
-    x: perfis.map(p => pct_por_perfil[p][gi]),
-    type: 'bar',
-    orientation: 'h',
-    marker: {
-      color: gi === 3 ? GOLD :
-             gi === 2 ? 'rgba(201,168,76,0.45)' :
-             gi === 1 ? 'rgba(232,228,218,0.2)' :
-                        'rgba(232,228,218,0.1)',
-      line: { width: 0 },
+  Plotly.newPlot('chart-area', [
+    {
+      x: meses, y: inad, name: 'Inadimplente',
+      type: 'scatter', mode: 'none',
+      fill: 'tozeroy', fillcolor: 'rgba(196,68,68,0.55)',
+      stackgroup: 'one',
+      hovertemplate: '<b>Inadimplente</b><br>%{x}: %{y}%<extra></extra>',
     },
-    text: perfis.map(p => pct_por_perfil[p][gi] + '%'),
-    textposition: 'inside',
-    textfont: { size: 11, color: gi >= 2 ? '#0a0c10' : CREAM },
-    hovertemplate: `<b>${g}</b><br>%{y}: %{x}%<extra></extra>`,
-  }));
-
-  Plotly.newPlot('chart-hbar', tracesReal, {
+    {
+      x: meses, y: bom, name: 'Bom Pagador',
+      type: 'scatter', mode: 'none',
+      fill: 'tonexty', fillcolor: 'rgba(53,160,122,0.55)',
+      stackgroup: 'one',
+      hovertemplate: '<b>Bom Pagador</b><br>%{x}: %{y}%<extra></extra>',
+    },
+    {
+      x: meses, y: pot, name: 'Cliente Potencial',
+      type: 'scatter', mode: 'none',
+      fill: 'tonexty', fillcolor: 'rgba(201,168,76,0.75)',
+      stackgroup: 'one',
+      hovertemplate: '<b>Cliente Potencial</b><br>%{x}: %{y}%<extra></extra>',
+    },
+  ], {
     ...PL,
-    barmode: 'stack',
-    xaxis: { ...PL.xaxis, ticksuffix: '%', range: [0, 105], title: '% de Clientes no Grupo' },
-    yaxis: { ...PL.yaxis, title: '', tickfont: { size: 12, color: CREAM } },
-    legend: { ...PL.legend, orientation: 'h', y: -0.22,
-      traceorder: 'normal',
-      title: { text: 'Meses no rotativo: ', font: { size: 11, color: CREAM } }
-    },
-    margin: { l: 130, r: 16, t: 8, b: 70 },
+    yaxis: { ...PL.yaxis, ticksuffix: '%', range: [0, 100], title: '% da Carteira Ativa' },
+    xaxis: { ...PL.xaxis },
+    legend: { ...PL.legend, orientation: 'h', y: -0.22 },
+    margin: { l: 56, r: 16, t: 8, b: 65 },
     annotations: [
-      { x: 77, y: 'Cliente Potencial', text: '⭐ 47% ficam 7–8 meses',
-        showarrow: false, font: { size: 10, color: GOLD },
-        xref: 'x', yref: 'y', xanchor: 'left' },
+      {
+        x: 'Mês 8', y: 36,
+        text: '72% Potencial', showarrow: false,
+        font: { size: 11, color: '#0a0c10', family: 'DM Sans, sans-serif' },
+        xref: 'x', yref: 'y', xanchor: 'right',
+      },
+      {
+        x: 'Mês 1', y: 71,
+        text: '42%', showarrow: false,
+        font: { size: 10, color: '#0a0c10', family: 'DM Sans, sans-serif' },
+        xref: 'x', yref: 'y',
+      },
     ],
   }, PC);
 }
