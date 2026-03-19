@@ -308,7 +308,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
         </div>
         <div class="insight-stat">
           <div class="big" id="big-receita-total">...</div>
-          <div class="sm">Receita Líquida Total</div>
+          <div class="sm">Receita — Clientes Potenciais</div>
         </div>
       </div>
 
@@ -456,23 +456,6 @@ function updateRange(f){
 
 function selectAtraso(v){selectedAtrasos=v;document.getElementById('btn-atraso-sim').classList.toggle('selected',v);document.getElementById('btn-atraso-nao').classList.toggle('selected',!v);}
 function fmtBRL(v){if(Math.abs(v)>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(Math.abs(v)>=1e3)return'R$ '+(v/1e3).toFixed(1)+'K';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-
-async function loadDashboard(){
-  const filtros = lerFiltros();
-  const res = await fetch('/api/dashboard-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(filtros)});
-  const data = await res.json();
-  const m = data.metricas;
-
-  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_total);
-  document.getElementById('m-receita-pot').textContent  = fmtBRL(m.receita_potencial);
-  document.getElementById('m-receita-bom').textContent  = fmtBRL(m.receita_bom);
-  document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
-  document.getElementById('m-pot-sub').textContent  = `${m.pct_potencial}% da base · ${m.n_potencial.toLocaleString('pt-BR')} clientes`;
-  document.getElementById('m-bom-sub').textContent  = `${m.pct_bom}% da base · ${m.n_bom.toLocaleString('pt-BR')} clientes`;
-  document.getElementById('m-inad-sub').textContent = `${m.pct_inadimplente}% da base · ${m.n_inadimplente.toLocaleString('pt-BR')} clientes`;
-
-  renderDist(data);renderEvolucao(data);renderDRevolucao();renderArea(data);renderRPC();
-}
 
 function renderDist(d){
   const m=d.metricas,p=['Cliente Potencial','Bom Pagador','Inadimplente'];
@@ -767,7 +750,7 @@ async function loadDashboard(){
   const data = await res.json();
   const m    = data.metricas;
 
-  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_total);
+  document.getElementById('big-receita-total').textContent = fmtBRL(m.receita_potencial);
   document.getElementById('m-receita-pot').textContent  = fmtBRL(m.receita_potencial);
   document.getElementById('m-receita-bom').textContent  = fmtBRL(m.receita_bom);
   document.getElementById('m-receita-inad').textContent = fmtBRL(m.receita_inadimplente);
