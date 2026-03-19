@@ -26,8 +26,9 @@ app = Flask(__name__)
 TAXA_JUROS_MENSAL    = 0.1505   # 15,05% a.m. — crédito rotativo (438% a.a.)
 TAXA_JUROS_PARCELADO = 0.0925   # 9,25% a.m.  — cartão parcelado (189% a.a.)
 TOTAL_CLIENTES       = 12500
-MAX_COMPROMETIMENTO  = 0.30     # 30% da renda — limite recomendado
-MINIMO_PCT           = 0.05     # pagamento mínimo = 5% da dívida
+MAX_COMPROMETIMENTO  = 0.30     # 30% da renda — limite máximo recomendado
+ALVO_COMPROMETIMENTO = 0.25     # 25% da renda — alvo conservador
+MINIMO_PCT           = 0.15     # pagamento mínimo = 15% da fatura (padrão BC)
 
 # ─────────────────────────────────────────────
 # GERAÇÃO DA BASE SINTÉTICA (seed fixo = reproduzível)
@@ -100,10 +101,11 @@ def _gerar_base():
                 razao  = divida / salario_anual
 
             # ── Comprometimento de renda ──
-            pag_min     = divida * MINIMO_PCT
+            pag_min     = divida * MINIMO_PCT   # 15% da dívida
             comprom     = pag_min / salario if salario > 0 else 0
 
-            # ── Receita gerada (fórmula do grupo) ──
+            # ── Receita gerada (fórmula do grupo: dívida × taxa × meses) ──
+            # Nota: receita incide sobre o saldo rotativo, independente do mínimo
             if perfil == "potencial":
                 receita = divida * TAXA_JUROS_MENSAL * meses
             elif perfil == "bom":
@@ -430,17 +432,27 @@ def analisar_cliente_ml(idade, salario_mensal, atrasos, divida_pendente, meses_r
     # ── Cálculos financeiros ──
     receita_mensal_juros = divida_pendente * TAXA_JUROS_MENSAL
     receita_projetada    = receita_mensal_juros * min(meses_rotativo, 8)
-    margem_disponivel    = (salario_mensal * MAX_COMPROMETIMENTO) - pag_min
-    credito_adicional    = max(0, (margem_disponivel / MINIMO_PCT) if margem_disponivel > 0 else 0)
+
+    # Crédito adicional máximo — regra correta:
+    # (divida_atual + credito_novo) × 15% ≤ salário × 30%
+    # → credito_novo ≤ (salário × 30% / 15%) - divida_atual
+    limite_divida_total = (salario_mensal * MAX_COMPROMETIMENTO) / MINIMO_PCT
+    credito_adicional   = max(0, limite_divida_total - divida_pendente)
+
+    # Verificação: mínimo do crédito novo não deve ultrapassar 25% sozinho
+    credito_adicional_conservador = max(0, (salario_mensal * ALVO_COMPROMETIMENTO / MINIMO_PCT) - divida_pendente)
 
     return {
         "perfil":                    perfil,
         "prob_perfis":               prob_dict,
-        "razao_divida_renda":        round(razao_dr, 2),
+        "razao_divida_renda":        round(razao_dr, 3),
         "comprometimento_atual_pct": round(comprometimento * 100, 1),
         "receita_mensal_juros":      round(receita_mensal_juros, 2),
         "receita_projetada_8m":      round(receita_projetada, 2),
         "credito_adicional_max":     round(credito_adicional, 2),
+        "credito_adicional_conserv": round(credito_adicional_conservador, 2),
+        "pag_min_nova_divida":       round(credito_adicional * MINIMO_PCT, 2),
+        "comprom_total_pct":         round((pag_min + credito_adicional * MINIMO_PCT) / salario_mensal * 100, 1),
         "score_interno":             score_interno,
         "prob_ruptura":              prob_ruptura,
         "pagamento_minimo_atual":    round(pag_min, 2),
