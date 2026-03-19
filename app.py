@@ -12,10 +12,9 @@ Pipeline completo:
 import random
 import numpy as np
 from flask import Flask, render_template, jsonify, request
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import cross_val_score
 
 app = Flask(__name__)
 
@@ -188,30 +187,26 @@ def _treinar_modelo():
 
     modelo = Pipeline([
         ("scaler", StandardScaler()),
-        ("rf", RandomForestClassifier(
-            n_estimators=200,       # 200 árvores — boa estabilidade sem custo excessivo
-            max_depth=12,           # profundidade controlada — evita overfitting
-            min_samples_leaf=8,     # mínimo 8 amostras por folha — generalização
-            class_weight="balanced",# compensa o desbalanceamento (59% potencial)
+        ("dt", DecisionTreeClassifier(
+            max_depth=5,          # árvore rasa — leve e generalizável
+            min_samples_leaf=15,  # evita overfitting em folhas pequenas
+            class_weight="balanced",
             random_state=42,
-            n_jobs=-1,
         )),
     ])
 
     modelo.fit(X, y)
 
-    # Validação cruzada rápida (5 folds) para reportar acurácia real
-    scores = cross_val_score(modelo, X, y, cv=5, scoring="f1_weighted")
-    print(f"  Random Forest — F1 médio (5-fold CV): {scores.mean():.3f} ± {scores.std():.3f}")
-
     # Importância das features
-    rf = modelo.named_steps["rf"]
-    feature_names = ["idade","salario_mensal","meses_rotativo","atrasos","razao_dr","comprometimento"]
-    importancias   = rf.feature_importances_
+    dt = modelo.named_steps["dt"]
+    feature_names = ["meses_rotativo","atrasos","salario_mensal","idade",
+                     "razao_dr","comprometimento","divida","meses_x_atrasos","sal_faixa"]
+    importancias  = dt.feature_importances_
     print("  Importância das features:")
     for fn, imp in sorted(zip(feature_names, importancias), key=lambda x: -x[1]):
-        bar = "█" * int(imp * 40)
-        print(f"    {fn:<20} {imp:.3f}  {bar}")
+        if imp > 0.01:
+            bar = "█" * int(imp * 40)
+            print(f"    {fn:<20} {imp:.3f}  {bar}")
 
     return modelo
 
@@ -503,7 +498,7 @@ def analisar_cliente():
 if __name__ == "__main__":
     print(f"\n{'='*55}")
     print("  VEXOR — Motor de Análise de Crédito")
-    print(f"  Base: {len(BASE):,} clientes | Modelo: Random Forest")
+    print(f"  Base: {len(BASE):,} clientes | Modelo: Decision Tree (leve)")
     print(f"  Acesse: http://localhost:5000")
     print(f"{'='*55}\n")
     app.run(debug=False, port=5000)
