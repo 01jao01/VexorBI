@@ -92,13 +92,13 @@ def _gerar_base():
             salario_anual = salario * 12
             if perfil == "bom":
                 divida = max(10, rng.gauss(41, 15))
-                razao  = divida / salario_anual
+                razao  = divida / salario          # D/R mensal: dívida ÷ salário mensal
             elif perfil == "inadimplente":
                 divida = max(200, rng.gauss(1_066, 300))
-                razao  = divida / salario_anual
+                razao  = divida / salario
             else:
                 divida = max(500, rng.gauss(2_270, 600))
-                razao  = divida / salario_anual
+                razao  = divida / salario
 
             # ── Comprometimento de renda ──
             pag_min     = divida * MINIMO_PCT   # 15% da dívida
@@ -378,9 +378,9 @@ def _calcular_area(sub):
 # Se margem ≤ 0: cliente já está no limite ou acima → crédito_max = 0
 
 def analisar_cliente_ml(idade, salario_mensal, atrasos, divida_pendente, meses_rotativo):
-    salario_anual  = salario_mensal * 12
-    razao_dr       = divida_pendente / salario_anual if salario_anual > 0 else 0
-    pag_min        = divida_pendente * MINIMO_PCT
+    salario_anual   = salario_mensal * 12
+    razao_dr        = divida_pendente / salario_mensal if salario_mensal > 0 else 0  # D/R mensal
+    pag_min         = divida_pendente * MINIMO_PCT
     comprometimento = pag_min / salario_mensal if salario_mensal > 0 else 0
 
     # ── Classificação via Random Forest ──
