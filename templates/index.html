@@ -629,7 +629,7 @@ function renderResultado(r,inp){
   const probBom  = (probs.bom          || 0).toFixed(1);
   const probInad = (probs.inadimplente || 0).toFixed(1);
   h+=`<div class="chart-card" style="padding:14px 18px;">
-    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--cream-mute);margin-bottom:12px;">Probabilidade por Perfil — Random Forest</div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--cream-mute);margin-bottom:12px;">Probabilidade por Perfil</div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       ${probBar('Cliente Potencial', probPot, GOLD)}
       ${probBar('Bom Pagador',       probBom, EMERALD_L)}
