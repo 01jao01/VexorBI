@@ -640,12 +640,12 @@ function renderResultado(r,inp){
   // ── Métricas ──
   h+=`<p class="section-label">Indicadores Calculados</p><div class="result-metrics-grid">`;
   if(r.perfil==='potencial'){
-    h+=mc('Juros Mensais Gerados', fmtBRL(r.receita_mensal_juros), 'Taxa 15,05% a.m.', GOLD);
+    h+=mc('Juros Mensais Gerados', fmtBRL(r.receita_mensal_juros), 'Taxa 15,05% a.m. sobre saldo rotativo', GOLD);
     h+=mc('Receita Projetada ('+r.meses_rotativo+'m)', fmtBRL(r.receita_projetada_8m), 'Se permanecer no rotativo', GOLD);
-    h+=mc('Comprometimento Atual', r.comprometimento_atual_pct+'%', 'da renda com mínimo', r.comprometimento_atual_pct>30?CRIMSON_L:GOLD);
-    h+=mc('Razão Dívida/Renda', r.razao_divida_renda+'×', 'Pressão relativa à renda anual', r.razao_divida_renda>0.1?CRIMSON_L:EMERALD_L);
-    h+=mc('Crédito Adicional Máx.', fmtBRL(r.credito_adicional_max), 'Limite: 30% comprometimento', BLUE_L);
-    h+=mc('Mín. Sobre Nova Oferta', fmtBRL(r.credito_adicional_max*0.05), 'Pagamento mín. adicional', BLUE_L);
+    h+=mc('Mínimo Atual (15% dívida)', fmtBRL(r.pagamento_minimo_atual), r.comprometimento_atual_pct+'% da renda mensal', r.comprometimento_atual_pct>25?CRIMSON_L:GOLD);
+    h+=mc('Crédito Adicional Máx.', fmtBRL(r.credito_adicional_max), 'Mínimo total ≤ 30% da renda', BLUE_L);
+    h+=mc('Mín. Sobre Nova Dívida', fmtBRL(r.pag_min_nova_divida), r.comprom_total_pct+'% comprometimento total', BLUE_L);
+    h+=mc('Juros Nova Oferta/mês', fmtBRL(r.credito_adicional_max*0.1505), 'Receita adicional ao banco', GOLD);
   }else if(r.perfil==='bom'){
     h+=mc('Razão Dívida/Renda', r.razao_divida_renda+'×', 'Confortável — baixo risco', EMERALD_L);
     h+=mc('Score de Pressão', r.score_interno+'/100', 'Pontuação Vexor', EMERALD_L);
@@ -685,7 +685,7 @@ function renderResultado(r,inp){
   h+=`<p class="section-label">Alertas Estratégicos</p>`;
   if(r.perfil==='potencial'){
     h+=ab('ruptura','🔴','Risco de Ruptura',`Se este cliente perder a fonte de renda, a dívida de <b>${fmtBRL(inp.divida_pendente)}</b> torna-se impagável. Probabilidade de ruptura estimada: <b>${r.prob_ruptura}%</b>.`);
-    h+=ab('oport','🟢','Risco de Oportunidade — Oferta de Crédito',`Este cliente suporta oferta adicional de até <b>${fmtBRL(r.credito_adicional_max)}</b> sem ultrapassar 30% de comprometimento. Pagamento mínimo incremental: <b>${fmtBRL(r.credito_adicional_max*0.05)}/mês</b>, gerando <b>${fmtBRL(r.credito_adicional_max*0.1505)}/mês</b> em juros.`);
+    h+=ab('oport','🟢','Risco de Oportunidade — Oferta de Crédito',`Este cliente suporta crédito adicional de até <b>${fmtBRL(r.credito_adicional_max)}</b>. O pagamento mínimo da nova dívida seria <b>${fmtBRL(r.pag_min_nova_divida)}/mês</b> (15% da dívida), levando o comprometimento total a <b>${r.comprom_total_pct}%</b> da renda — dentro do limite de 30%. Receita adicional de juros: <b>${fmtBRL(r.credito_adicional_max*0.1505)}/mês</b>.`);
     h+=ab('aviso','🟡','Monitoramento Contínuo',`Cliente crônico no rotativo há ${inp.meses_rotativo} meses. Revisão trimestral recomendada. Evitar expansão de limite sem análise atualizada de renda.`);
   }else if(r.perfil==='bom'){
     h+=ab('info','🔵','Segurança Operacional — Baixa Lucratividade',`Cliente excelente em risco, mas gera apenas <b>${fmtBRL(r.receita_mensal_juros)}/mês</b> em juros. Estratégia ideal: cross-sell de produtos de maior margem (consórcio, seguros, investimentos).`);
